@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Master A1-A2</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Prompt', sans-serif;
+            background-color: #f0fdf4; /* Green-50 */
+        }
+        .eng-font {
+            font-family: 'Nunito', sans-serif;
+        }
+        .card-shadow {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .btn-bounce:active {
+            transform: scale(0.95);
+        }
+        .correct-anim {
+            animation: pulse-green 0.5s;
+        }
+        .wrong-anim {
+            animation: shake 0.5s;
+        }
+        @keyframes pulse-green {
+            0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); transform: scale(1); }
+            70% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); transform: scale(1.02); }
+            100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); transform: scale(1); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888; 
+            border-radius: 4px;
+        }
+        
+        /* Toggle Switch */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #68D391;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #68D391;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center text-gray-800 bg-gradient-to-br from-green-100 to-blue-100 p-4">
+
+    <!-- App Container -->
+    <div id="app" class="w-full max-w-md bg-white rounded-3xl card-shadow overflow-hidden min-h-[650px] relative flex flex-col">
+        
+        <!-- Header -->
+        <header class="bg-indigo-600 text-white p-4 text-center relative z-10 flex justify-center items-center shadow-md">
+            <div class="flex-grow text-center">
+                <h1 class="text-xl font-bold">🇬🇧 English Master</h1>
+                <p class="text-xs text-indigo-200">Oxford 3000 Edition</p>
+            </div>
+        </header>
+
+        <!-- Content Area -->
+        <main class="flex-grow p-6 flex flex-col items-center justify-center relative w-full overflow-y-auto">
+            
+            <!-- VIEW: MENU -->
+            <div id="menu-view" class="w-full space-y-4 text-center transition-all duration-300">
+                <div class="mb-6">
+                    <img src="https://cdn-icons-png.flaticon.com/512/330/330425.png" alt="English Learning" class="w-24 h-24 mx-auto mb-4 opacity-80">
+                    <h2 class="text-2xl font-bold text-gray-700">เลือกโหมดฝึกฝน</h2>
+                    <p class="text-gray-500 text-sm mt-2">เพิ่มคลังคำศัพท์ของคุณ</p>
+                </div>
+
+                <button onclick="startGame('vocab')" class="btn-bounce w-full bg-white border-2 border-orange-400 p-4 rounded-2xl flex items-center shadow-sm hover:shadow-md transition-all group">
+                    <div class="bg-orange-100 p-3 rounded-full mr-4 group-hover:bg-orange-200 transition">
+                        <span class="text-2xl">📖</span>
+                    </div>
+                    <div class="text-left">
+                        <h3 class="font-bold text-lg text-gray-800">คำศัพท์ (Vocabulary)</h3>
+                        <p class="text-xs text-gray-500">รวมศัพท์ A1-A2 จากไฟล์</p>
+                    </div>
+                </button>
+
+                <button onclick="startGame('phonetic')" class="btn-bounce w-full bg-white border-2 border-purple-400 p-4 rounded-2xl flex items-center shadow-sm hover:shadow-md transition-all group">
+                    <div class="bg-purple-100 p-3 rounded-full mr-4 group-hover:bg-purple-200 transition">
+                        <span class="text-2xl">🗣️</span>
+                    </div>
+                    <div class="text-left">
+                        <h3 class="font-bold text-lg text-gray-800">การออกเสียง (Phonetics)</h3>
+                        <p class="text-xs text-gray-500">ฝึกฟังเสียงและสัญลักษณ์</p>
+                    </div>
+                </button>
+            </div>
+
+            <!-- VIEW: GAME -->
+            <div id="game-view" class="w-full hidden flex-col h-full relative pt-2">
+                
+                <!-- Top Control Bar (Score & Quit) -->
+                <div class="flex justify-between items-center mb-4 w-full bg-gray-50 p-2 rounded-lg border border-gray-200">
+                    <div class="flex items-center gap-2">
+                        <span id="question-count" class="bg-indigo-100 text-indigo-700 px-2 py-1 rounded-md text-xs font-bold">ข้อ 1</span>
+                        <span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded-md text-xs font-bold flex items-center gap-1">
+                            ⭐ <span id="score-display">0</span>
+                        </span>
+                    </div>
+                    
+                    <!-- Quit Button (Moved here to avoid overlap) -->
+                    <button onclick="endGameManually()" class="text-gray-400 hover:text-red-500 p-1 transition bg-white rounded-full shadow-sm border border-gray-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Toggle Switch (Vocab only) -->
+                <div id="mode-toggle-container" class="flex items-center justify-center gap-2 mb-4 w-full">
+                    <span class="text-xs text-gray-500 font-medium">ซ่อนคำศัพท์ (โชว์ IPA)</span>
+                    <div class="relative inline-block w-10 align-middle select-none transition duration-200 ease-in">
+                        <input type="checkbox" name="toggle" id="ipa-toggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer border-gray-300 transition-all duration-300 top-0 left-0"/>
+                        <label for="ipa-toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer transition-colors duration-300"></label>
+                    </div>
+                </div>
+
+                <!-- Question Card -->
+                <div class="bg-gray-50 rounded-2xl p-6 border border-gray-100 shadow-inner mb-4 text-center relative flex-grow flex flex-col justify-center items-center min-h-[200px]">
+                    
+                    <!-- Sound Button -->
+                    <button onclick="speakCurrentWord()" class="absolute top-3 right-3 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full p-2 transition shadow-sm z-20">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                        </svg>
+                    </button>
+
+                    <div id="question-content" class="w-full transition-all duration-300">
+                        <!-- Content injected by JS -->
+                    </div>
+                </div>
+
+                <!-- Options -->
+                <div id="options-container" class="grid grid-cols-1 gap-3 w-full mb-4">
+                    <!-- Buttons injected by JS -->
+                </div>
+
+                <!-- Feedback Area (Clickable to next) -->
+                <div id="feedback-area" onclick="handleFeedbackClick()" class="h-10 flex items-center justify-center cursor-pointer hover:bg-gray-50 rounded-lg transition">
+                    <p id="feedback-text" class="text-lg font-bold"></p>
+                    <span id="tap-hint" class="hidden text-xs text-gray-400 ml-2">(แตะเพื่อไปต่อ)</span>
+                </div>
+
+            </div>
+
+            <!-- VIEW: RESULT -->
+            <div id="result-view" class="hidden w-full text-center">
+                <div class="mb-6">
+                    <div class="inline-block p-4 rounded-full bg-blue-100 text-6xl mb-4 animate-bounce">
+                        🏁
+                    </div>
+                    <h2 class="text-3xl font-bold text-gray-800">สรุปผลการฝึก</h2>
+                    <p class="text-gray-500">การฝึกฝนคือหัวใจของความสำเร็จ</p>
+                </div>
+
+                <div class="bg-white border-2 border-indigo-100 rounded-2xl p-6 mb-8 shadow-sm">
+                    <p class="text-gray-600 mb-2">คะแนนรวมของคุณ</p>
+                    <div class="text-5xl font-extrabold text-indigo-600 mb-2 eng-font">
+                        <span id="final-score">0</span> / <span id="total-score">0</span>
+                    </div>
+                    <p id="result-message" class="text-sm font-bold text-orange-500"></p>
+                </div>
+
+                <div class="space-y-3">
+                    <button onclick="showMenu()" class="w-full bg-gray-200 text-gray-700 py-3 rounded-xl font-bold hover:bg-gray-300 transition">
+                        กลับหน้าหลัก
+                    </button>
+                    <button onclick="retryGame()" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold hover:bg-indigo-700 transition shadow-lg">
+                        เล่นต่อ
+                    </button>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- DATASETS ---
+        // Vocab Data (Extracted from your PDF) - Same large list
+        const vocabRawList = [
+            { w: "about", t: "prep., adv.", m: "เกี่ยวกับ", i: "/əˈbaʊt/" },
+            { w: "above", t: "prep., adv.", m: "ข้างบน", i: "/əˈbʌv/" },
+            { w: "across", t: "prep., adv.", m: "ข้าม", i: "/əˈkrɒs/" },
+            { w: "action", t: "n.", m: "การกระทำ", i: "/ˈækʃn/" },
+            { w: "activity", t: "n.", m: "กิจกรรม", i: "/ækˈtɪvəti/" },
+            { w: "actor", t: "n.", m: "นักแสดงชาย", i: "/ˈæktə(r)/" },
+            { w: "actress", t: "n.", m: "นักแสดงหญิง", i: "/ˈæktrəs/" },
+            { w: "add", t: "v.", m: "เพิ่ม", i: "/æd/" },
+            { w: "address", t: "n.", m: "ที่อยู่", i: "/əˈdres/" },
+            { w: "adult", t: "n.", m: "ผู้ใหญ่", i: "/ˈædʌlt/" },
+            { w: "advice", t: "n.", m: "คำแนะนำ", i: "/ədˈvaɪs/" },
+            { w: "afraid", t: "adj.", m: "เกรงกลัว", i: "/əˈfreɪd/" },
+            { w: "after", t: "prep.", m: "หลังจาก", i: "/ˈɑːftə(r)/" },
+            { w: "afternoon", t: "n.", m: "ตอนบ่าย", i: "/ˌɑːftəˈnuːn/" },
+            { w: "again", t: "adv.", m: "อีกครั้ง", i: "/əˈɡeɪn/" },
+            { w: "age", t: "n.", m: "อายุ", i: "/eɪdʒ/" },
+            { w: "ago", t: "adv.", m: "ที่ผ่านมา", i: "/əˈɡəʊ/" },
+            { w: "agree", t: "v.", m: "เห็นด้วย", i: "/əˈɡriː/" },
+            { w: "air", t: "n.", m: "อากาศ", i: "/eə(r)/" },
+            { w: "airport", t: "n.", m: "สนามบิน", i: "/ˈeəpɔːt/" },
+            { w: "all", t: "det., pron.", m: "ทั้งหมด", i: "/ɔːl/" },
+            { w: "also", t: "adv.", m: "อีกด้วย", i: "/ˈɔːlsəʊ/" },
+            { w: "always", t: "adv.", m: "เสมอ", i: "/ˈɔːlweɪz/" },
+            { w: "amazing", t: "adj.", m: "อัศจรรย์", i: "/əˈmeɪzɪŋ/" },
+            { w: "angry", t: "adj.", m: "โกรธ", i: "/ˈæŋɡri/" },
+            { w: "animal", t: "n.", m: "สัตว์", i: "/ˈænɪml/" },
+            { w: "answer", t: "n., v.", m: "คำตอบ", i: "/ˈɑːnsə(r)/" },
+            { w: "any", t: "det., pron.", m: "ใดๆ", i: "/ˈeni/" },
+            { w: "anyone", t: "pron.", m: "ใครก็ได้", i: "/ˈeniwʌn/" },
+            { w: "apartment", t: "n.", m: "อพาร์ทเม้น", i: "/əˈpɑːtmənt/" },
+            { w: "apple", t: "n.", m: "แอปเปิล", i: "/ˈæpl/" },
+            { w: "area", t: "n.", m: "พื้นที่", i: "/ˈeəriə/" },
+            { w: "arm", t: "n.", m: "แขน", i: "/ɑːm/" },
+            { w: "around", t: "prep., adv.", m: "รอบๆ", i: "/əˈraʊnd/" },
+            { w: "arrive", t: "v.", m: "มาถึง", i: "/əˈraɪv/" },
+            { w: "art", t: "n.", m: "ศิลปะ", i: "/ɑːt/" },
+            { w: "article", t: "n.", m: "บทความ", i: "/ˈɑːtɪkl/" },
+            { w: "artist", t: "n.", m: "ศิลปิน", i: "/ˈɑːtɪst/" },
+            { w: "ask", t: "v.", m: "ถาม", i: "/ɑːsk/" },
+            { w: "autumn", t: "n.", m: "ฤดูใบไม้ร่วง", i: "/ˈɔːtəm/" },
+            { w: "baby", t: "n.", m: "ทารก", i: "/ˈbeɪbi/" },
+            { w: "back", t: "n., adv.", m: "กลับ / ด้านหลัง", i: "/bæk/" },
+            { w: "bad", t: "adj.", m: "แย่", i: "/bæd/" },
+            { w: "bag", t: "n.", m: "ถุง", i: "/bæg/" },
+            { w: "ball", t: "n.", m: "ลูกบอล", i: "/bɔːl/" },
+            { w: "banana", t: "n.", m: "กล้วย", i: "/bəˈnɑːnə/" },
+            { w: "band", t: "n.", m: "วงดนตรี", i: "/bænd/" },
+            { w: "bank", t: "n.", m: "ธนาคาร", i: "/bæŋk/" },
+            { w: "bathroom", t: "n.", m: "ห้องน้ำ", i: "/ˈbɑːθruːm/" },
+            { w: "beach", t: "n.", m: "ชายหาด", i: "/biːtʃ/" },
+            { w: "beautiful", t: "adj.", m: "สวยงาม", i: "/ˈbjuːtɪfl/" },
+            { w: "because", t: "conj.", m: "เพราะว่า", i: "/bɪˈkɒz/" },
+            { w: "become", t: "v.", m: "กลายเป็น", i: "/bɪˈkʌm/" },
+            { w: "bed", t: "n.", m: "เตียง", i: "/bed/" },
+            { w: "bedroom", t: "n.", m: "ห้องนอน", i: "/ˈbedruːm/" },
+            { w: "begin", t: "v.", m: "เริ่มต้น", i: "/bɪˈɡɪn/" },
+            { w: "behaviour", t: "n.", m: "พฤติกรรม", i: "/bɪˈheɪvjə(r)/" },
+            { w: "behind", t: "prep., adv.", m: "ข้างหลัง", i: "/bɪˈhaɪnd/" },
+            { w: "believe", t: "v.", m: "เชื่อ", i: "/bɪˈliːv/" },
+            { w: "benefit", t: "n.", m: "ประโยชน์", i: "/ˈbenɪfɪt/" },
+            { w: "best", t: "adj.", m: "ดีที่สุด", i: "/best/" },
+            { w: "better", t: "adj.", m: "ดีกว่า", i: "/ˈbetə(r)/" },
+            { w: "between", t: "prep.", m: "ระหว่าง", i: "/bɪˈtwiːn/" },
+            { w: "bicycle", t: "n.", m: "จักรยาน", i: "/ˈbaɪsɪkl/" },
+            { w: "big", t: "adj.", m: "ใหญ่", i: "/bɪɡ/" },
+            { w: "bill", t: "n.", m: "ใบแจ้งหนี้", i: "/bɪl/" },
+            { w: "bird", t: "n.", m: "นก", i: "/bɜːd/" },
+            { w: "birthday", t: "n.", m: "วันเกิด", i: "/ˈbɜːθdeɪ/" },
+            { w: "black", t: "adj., n.", m: "สีดำ", i: "/blæk/" },
+            { w: "blog", t: "n.", m: "บล็อก", i: "/blɒɡ/" },
+            { w: "blood", t: "n.", m: "เลือด", i: "/blʌd/" },
+            { w: "blue", t: "adj., n.", m: "สีฟ้า", i: "/bluː/" },
+            { w: "board", t: "n.", m: "กระดาน", i: "/bɔːd/" },
+            { w: "boat", t: "n.", m: "เรือ", i: "/bəʊt/" },
+            { w: "body", t: "n.", m: "ร่างกาย", i: "/ˈbɒdi/" },
+            { w: "book", t: "n.", m: "หนังสือ", i: "/bʊk/" },
+            { w: "boring", t: "adj.", m: "น่าเบื่อ", i: "/ˈbɔːrɪŋ/" },
+            { w: "born", t: "v.", m: "เกิด", i: "/bɔːn/" },
+            { w: "both", t: "det., pron.", m: "ทั้งคู่", i: "/bəʊθ/" },
+            { w: "bottle", t: "n.", m: "ขวด", i: "/ˈbɒtl/" },
+            { w: "box", t: "n.", m: "กล่อง", i: "/bɒks/" },
+            { w: "boy", t: "n.", m: "เด็กผู้ชาย", i: "/bɔɪ/" },
+            { w: "boyfriend", t: "n.", m: "แฟน(ชาย)", i: "/ˈbɔɪfrend/" },
+            { w: "bread", t: "n.", m: "ขนมปัง", i: "/bred/" },
+            { w: "break", t: "v., n.", m: "หยุดพัก / แตก", i: "/breɪk/" },
+            { w: "breakfast", t: "n.", m: "อาหารเช้า", i: "/ˈbrekfəst/" },
+            { w: "breathe", t: "v.", m: "หายใจ", i: "/briːð/" },
+            { w: "bridge", t: "n.", m: "สะพาน", i: "/brɪdʒ/" },
+            { w: "bright", t: "adj.", m: "สว่าง / ฉลาด", i: "/braɪt/" },
+            { w: "bring", t: "v.", m: "นำมา", i: "/brɪŋ/" },
+            { w: "brother", t: "n.", m: "พี่ชาย/น้องชาย", i: "/ˈbrʌðə(r)/" },
+            { w: "brown", t: "adj., n.", m: "สีน้ำตาล", i: "/braʊn/" },
+            { w: "build", t: "v.", m: "สร้าง", i: "/bɪld/" },
+            { w: "building", t: "n.", m: "อาคาร", i: "/ˈbɪldɪŋ/" },
+            { w: "bus", t: "n.", m: "รถบัส", i: "/bʌs/" },
+            { w: "business", t: "n.", m: "ธุรกิจ", i: "/ˈbɪznəs/" },
+            { w: "busy", t: "adj.", m: "ยุ่ง", i: "/ˈbɪzi/" },
+            { w: "buy", t: "v.", m: "ซื้อ", i: "/baɪ/" },
+            { w: "cake", t: "n.", m: "เค้ก", i: "/keɪk/" },
+            { w: "call", t: "v., n.", m: "เรียก / โทร", i: "/kɔːl/" },
+            { w: "camera", t: "n.", m: "กล้อง", i: "/ˈkæmrə/" },
+            { w: "camp", t: "n., v.", m: "ค่าย", i: "/kæmp/" },
+            { w: "can", t: "v.", m: "สามารถ", i: "/kæn/" },
+            { w: "capital", t: "n., adj.", m: "เมืองหลวง", i: "/ˈkæpɪtl/" },
+            { w: "car", t: "n.", m: "รถยนต์", i: "/kɑː(r)/" },
+            { w: "card", t: "n.", m: "การ์ด", i: "/kɑːd/" },
+            { w: "career", t: "n.", m: "อาชีพ", i: "/kəˈrɪə(r)/" },
+            { w: "carry", t: "v.", m: "พก / ถือ", i: "/ˈkæri/" },
+            { w: "cat", t: "n.", m: "แมว", i: "/kæt/" },
+            { w: "catch", t: "v.", m: "จับ", i: "/kætʃ/" },
+            { w: "cause", t: "n., v.", m: "สาเหตุ", i: "/kɔːz/" },
+            { w: "celebrate", t: "v.", m: "ฉลอง", i: "/ˈselɪbreɪt/" },
+            { w: "celebrity", t: "n.", m: "คนดัง", i: "/səˈlebrəti/" },
+            { w: "central", t: "adj.", m: "ศูนย์กลาง", i: "/ˈsentrəl/" },
+            { w: "centre", t: "n.", m: "ศูนย์", i: "/ˈsentə(r)/" },
+            { w: "century", t: "n.", m: "ศตวรรษ", i: "/ˈsentʃəri/" },
+            { w: "certain", t: "adj.", m: "แน่ใจ", i: "/ˈsɜːtn/" },
+            { w: "chair", t: "n.", m: "เก้าอี้", i: "/tʃeə(r)/" },
+            { w: "challenge", t: "n.", m: "ความท้าทาย", i: "/ˈtʃælɪndʒ/" },
+            { w: "champion", t: "n.", m: "แชมป์", i: "/ˈtʃæmpiən/" },
+            { w: "chance", t: "n.", m: "โอกาส", i: "/tʃɑːns/" },
+            { w: "change", t: "v., n.", m: "เปลี่ยน", i: "/tʃeɪndʒ/" },
+            { w: "channel", t: "n.", m: "ช่อง", i: "/ˈtʃænl/" },
+            { w: "chapter", t: "n.", m: "บท", i: "/ˈtʃæptə(r)/" },
+            { w: "character", t: "n.", m: "ตัวละคร / ลักษณะ", i: "/ˈkærəktə(r)/" },
+            { w: "charge", t: "n., v.", m: "ค่าใช้จ่าย", i: "/tʃɑːdʒ/" },
+            { w: "charity", t: "n.", m: "การกุศล", i: "/ˈtʃærəti/" },
+            { w: "chart", t: "n.", m: "แผนภูมิ", i: "/tʃɑːt/" },
+            { w: "cheap", t: "adj.", m: "ราคาถูก", i: "/tʃiːp/" },
+            { w: "cheat", t: "v., n.", m: "โกง", i: "/tʃiːt/" },
+            { w: "check", t: "v., n.", m: "ตรวจสอบ", i: "/tʃek/" },
+            { w: "chef", t: "n.", m: "พ่อครัว", i: "/ʃef/" },
+            { w: "chemical", t: "adj., n.", m: "ทางเคมี", i: "/ˈkemɪkl/" },
+            { w: "chemistry", t: "n.", m: "วิชาเคมี", i: "/ˈkemɪstri/" },
+            { w: "chicken", t: "n.", m: "ไก่", i: "/ˈtʃɪkɪn/" },
+            { w: "chief", t: "adj., n.", m: "หัวหน้า", i: "/tʃiːf/" },
+            { w: "child", t: "n.", m: "เด็ก", i: "/tʃaɪld/" },
+            { w: "childhood", t: "n.", m: "วัยเด็ก", i: "/ˈtʃaɪldhʊd/" },
+            { w: "chip", t: "n.", m: "ชิป / มันฝรั่งทอด", i: "/tʃɪp/" },
+            { w: "choice", t: "n.", m: "ทางเลือก", i: "/tʃɔɪs/" },
+            { w: "choose", t: "v.", m: "เลือก", i: "/tʃuːz/" },
+            { w: "church", t: "n.", m: "โบสถ์", i: "/tʃɜːtʃ/" },
+            { w: "cigarette", t: "n.", m: "บุหรี่", i: "/ˌsɪɡəˈret/" },
+            { w: "cinema", t: "n.", m: "โรงหนัง", i: "/ˈsɪnəmə/" },
+            { w: "circle", t: "n., v.", m: "วงกลม", i: "/ˈsɜːkl/" },
+            { w: "citizen", t: "n.", m: "พลเมือง", i: "/ˈsɪtɪzn/" },
+            { w: "city", t: "n.", m: "เมือง", i: "/ˈsɪti/" },
+            { w: "civil", t: "adj.", m: "พลเรือน", i: "/ˈsɪvl/" },
+            { w: "claim", t: "v., n.", m: "อ้างสิทธิ์ / เรียกร้อง", i: "/kleɪm/" },
+            { w: "class", t: "n.", m: "ชั้นเรียน", i: "/klɑːs/" },
+            { w: "classic", t: "adj., n.", m: "คลาสสิก", i: "/ˈklæsɪk/" },
+            { w: "clean", t: "adj., v.", m: "สะอาด", i: "/kliːn/" },
+            { w: "clear", t: "adj., v.", m: "ชัดเจน", i: "/klɪə(r)/" },
+            { w: "clearly", t: "adv.", m: "อย่างชัดเจน", i: "/ˈklɪəli/" },
+            { w: "clever", t: "adj.", m: "ฉลาด", i: "/ˈklevə(r)/" },
+            { w: "click", t: "v., n.", m: "คลิก", i: "/klɪk/" },
+            { w: "client", t: "n.", m: "ลูกค้า", i: "/ˈklaɪənt/" },
+            { w: "climate", t: "n.", m: "ภูมิอากาศ", i: "/ˈklaɪmət/" },
+            { w: "climb", t: "v.", m: "ปีน", i: "/klaɪm/" },
+            { w: "clock", t: "n.", m: "นาฬิกา", i: "/klɒk/" },
+            { w: "close", t: "v., adj.", m: "ปิด / ใกล้", i: "/kləʊz/" },
+            { w: "closed", t: "adj.", m: "ปิด", i: "/kləʊzd/" },
+            { w: "cloth", t: "n.", m: "ผ้า", i: "/klɒθ/" },
+            { w: "clothes", t: "n.", m: "เสื้อผ้า", i: "/kləʊðz/" },
+            { w: "clothing", t: "n.", m: "เครื่องแต่งกาย", i: "/ˈkləʊðɪŋ/" },
+            { w: "cloud", t: "n.", m: "เมฆ", i: "/klaʊd/" },
+            { w: "club", t: "n.", m: "สโมสร", i: "/klʌb/" },
+            { w: "coach", t: "n.", m: "โค้ช", i: "/kəʊtʃ/" },
+            { w: "coal", t: "n.", m: "ถ่านหิน", i: "/kəʊl/" },
+            { w: "coast", t: "n.", m: "ชายฝั่ง", i: "/kəʊst/" },
+            { w: "coat", t: "n.", m: "เสื้อโค้ท", i: "/kəʊt/" },
+            { w: "code", t: "n.", m: "รหัส", i: "/kəʊd/" },
+            { w: "coffee", t: "n.", m: "กาแฟ", i: "/ˈkɒfi/" },
+            { w: "coin", t: "n.", m: "เหรียญ", i: "/kɔɪn/" },
+            { w: "cold", t: "adj., n.", m: "หนาว / ไข้หวัด", i: "/kəʊld/" },
+            { w: "collapse", t: "v., n.", m: "พังทลาย", i: "/kəˈlæps/" },
+            { w: "colleague", t: "n.", m: "เพื่อนร่วมงาน", i: "/ˈkɒliːɡ/" },
+            { w: "collect", t: "v.", m: "สะสม", i: "/kəˈlekt/" },
+            { w: "collection", t: "n.", m: "ของสะสม", i: "/kəˈlekʃn/" },
+            { w: "college", t: "n.", m: "วิทยาลัย", i: "/ˈkɒlɪdʒ/" },
+            { w: "colour", t: "n.", m: "สี", i: "/ˈkʌlə(r)/" },
+            { w: "coloured", t: "adj.", m: "มีสี", i: "/ˈkʌləd/" },
+            { w: "combine", t: "v.", m: "รวมกัน", i: "/kəmˈbaɪn/" },
+            { w: "come", t: "v.", m: "มา", i: "/kʌm/" },
+            { w: "comfort", t: "n., v.", m: "ความสบาย", i: "/ˈkʌmfət/" },
+            { w: "comfortable", t: "adj.", m: "สะดวกสบาย", i: "/ˈkʌmftəbl/" },
+            { w: "command", t: "n., v.", m: "คำสั่ง", i: "/kəˈmɑːnd/" },
+            { w: "comment", t: "n., v.", m: "ความเห็น", i: "/ˈkɒment/" },
+            { w: "commercial", t: "adj., n.", m: "เชิงพาณิชย์", i: "/kəˈmɜːʃl/" },
+            { w: "commission", t: "n., v.", m: "คณะกรรมการ/ค่านายหน้า", i: "/kəˈmɪʃn/" },
+            { w: "commit", t: "v.", m: "กระทำ(ความผิด)/ผูกมัด", i: "/kəˈmɪt/" },
+            { w: "commitment", t: "n.", m: "พันธสัญญา", i: "/kəˈmɪtmənt/" },
+            { w: "committee", t: "n.", m: "คณะกรรมการ", i: "/kəˈmɪti/" },
+            { w: "common", t: "adj.", m: "ทั่วไป", i: "/ˈkɒmən/" },
+            { w: "commonly", t: "adv.", m: "โดยทั่วไป", i: "/ˈkɒmənli/" },
+            { w: "communicate", t: "v.", m: "สื่อสาร", i: "/kəˈmjuːnɪkeɪt/" },
+            { w: "communication", t: "n.", m: "การสื่อสาร", i: "/kəˌmjuːnɪˈkeɪʃn/" },
+            { w: "community", t: "n.", m: "ชุมชน", i: "/kəˈmjuːnəti/" },
+            { w: "company", t: "n.", m: "บริษัท", i: "/ˈkʌmpəni/" },
+            { w: "compare", t: "v.", m: "เปรียบเทียบ", i: "/kəmˈpeə(r)/" },
+            { w: "comparison", t: "n.", m: "การเปรียบเทียบ", i: "/kəmˈpærɪsn/" },
+            { w: "compete", t: "v.", m: "แข่งขัน", i: "/kəmˈpiːt/" },
+            { w: "competition", t: "n.", m: "การแข่งขัน", i: "/ˌkɒmpəˈtɪʃn/" },
+            { w: "competitive", t: "adj.", m: "ที่เกี่ยวกับการแข่งขัน", i: "/kəmˈpetətɪv/" },
+            { w: "complain", t: "v.", m: "บ่น", i: "/kəmˈpleɪn/" },
+            { w: "complete", t: "adj., v.", m: "สมบูรณ์", i: "/kəmˈpliːt/" },
+            { w: "completely", t: "adv.", m: "อย่างสมบูรณ์", i: "/kəmˈpliːtli/" },
+            { w: "complex", t: "adj., n.", m: "ซับซ้อน", i: "/ˈkɒmpleks/" },
+            { w: "complicated", t: "adj.", m: "ยุ่งยาก", i: "/ˈkɒmplɪkeɪtɪd/" },
+            { w: "component", t: "n.", m: "ส่วนประกอบ", i: "/kəmˈpəʊnənt/" },
+            { w: "computer", t: "n.", m: "คอมพิวเตอร์", i: "/kəmˈpjuːtə(r)/" },
+            { w: "concentrate", t: "v.", m: "มีสมาธิ", i: "/ˈkɒnsntreɪt/" },
+            { w: "concentration", t: "n.", m: "สมาธิ", i: "/ˌkɒnsnˈtreɪʃn/" },
+            { w: "concept", t: "n.", m: "แนวคิด", i: "/ˈkɒnsept/" },
+            { w: "concern", t: "n., v.", m: "ความกังวล", i: "/kənˈsɜːn/" },
+            { w: "concerned", t: "adj.", m: "กังวล", i: "/kənˈsɜːnd/" },
+            { w: "concert", t: "n.", m: "คอนเสิร์ต", i: "/ˈkɒnsət/" },
+            { w: "conclude", t: "v.", m: "สรุป", i: "/kənˈkluːd/" },
+            { w: "conclusion", t: "n.", m: "ข้อสรุป", i: "/kənˈkluːʒn/" },
+            { w: "condition", t: "n.", m: "เงื่อนไข", i: "/kənˈdɪʃn/" },
+            { w: "conduct", t: "v., n.", m: "จัดการ/ความประพฤติ", i: "/kənˈdʌkt/" },
+            { w: "conference", t: "n.", m: "การประชุม", i: "/ˈkɒnfərəns/" },
+            { w: "confidence", t: "n.", m: "ความมั่นใจ", i: "/ˈkɒnfɪdəns/" },
+            { w: "confident", t: "adj.", m: "มั่นใจ", i: "/ˈkɒnfɪdənt/" },
+            { w: "confirm", t: "v.", m: "ยืนยัน", i: "/kənˈfɜːm/" },
+            { w: "conflict", t: "n., v.", m: "ความขัดแย้ง", i: "/ˈkɒnflɪkt/" },
+            { w: "confuse", t: "v.", m: "ทำให้สับสน", i: "/kənˈfjuːz/" },
+            { w: "confused", t: "adj.", m: "สับสน", i: "/kənˈfjuːzd/" },
+            { w: "connect", t: "v.", m: "เชื่อมต่อ", i: "/kəˈnekt/" },
+            { w: "connection", t: "n.", m: "การเชื่อมต่อ", i: "/kəˈnekʃn/" },
+            { w: "conscious", t: "adj.", m: "มีสติ", i: "/ˈkɒnʃəs/" },
+            { w: "consequence", t: "n.", m: "ผลที่ตามมา", i: "/ˈkɒnsɪkwəns/" },
+            { w: "conservative", t: "adj., n.", m: "อนุรักษ์นิยม", i: "/kənˈsɜːvətɪv/" },
+            { w: "consider", t: "v.", m: "พิจารณา", i: "/kənˈsɪdə(r)/" },
+            { w: "consideration", t: "n.", m: "การพิจารณา", i: "/kənˌsɪdəˈreɪʃn/" },
+            { w: "consist", t: "v.", m: "ประกอบด้วย", i: "/kənˈsɪst/" },
+            { w: "consistent", t: "adj.", m: "สม่ำเสมอ", i: "/kənˈsɪstənt/" },
+            { w: "constant", t: "adj.", m: "คงที่", i: "/ˈkɒnstənt/" },
+            { w: "constantly", t: "adv.", m: "อย่างสม่ำเสมอ", i: "/ˈkɒnstəntli/" },
+            { w: "construct", t: "v.", m: "ก่อสร้าง", i: "/kənˈstrʌkt/" },
+            { w: "construction", t: "n.", m: "การก่อสร้าง", i: "/kənˈstrʌkʃn/" },
+            { w: "consume", t: "v.", m: "บริโภค", i: "/kənˈsjuːm/" },
+            { w: "consumer", t: "n.", m: "ผู้บริโภค", i: "/kənˈsjuːmə(r)/" },
+            { w: "contact", t: "n., v.", m: "ติดต่อ", i: "/ˈkɒntækt/" },
+            { w: "contain", t: "v.", m: "บรรจุ", i: "/kənˈteɪn/" },
+            { w: "container", t: "n.", m: "ตู้คอนเทนเนอร์", i: "/kənˈteɪnə(r)/" },
+            { w: "contemporary", t: "adj.", m: "ร่วมสมัย", i: "/kənˈtemprəri/" },
+            { w: "content", t: "n.", m: "เนื้อหา", i: "/ˈkɒntent/" },
+            { w: "contest", t: "n., v.", m: "การประกวด", i: "/ˈkɒntest/" },
+            { w: "context", t: "n.", m: "บริบท", i: "/ˈkɒntekst/" },
+            { w: "continent", t: "n.", m: "ทวีป", i: "/ˈkɒntɪnənt/" },
+            { w: "continue", t: "v.", m: "ดําเนินการต่อ", i: "/kənˈtɪnjuː/" },
+            { w: "continuous", t: "adj.", m: "อย่างต่อเนื่อง", i: "/kənˈtɪnjuəs/" },
+            { w: "contract", t: "n., v.", m: "สัญญา", i: "/ˈkɒntrækt/" },
+            { w: "contrast", t: "n., v.", m: "ความแตกต่าง", i: "/ˈkɒntrɑːst/" },
+            { w: "contribute", t: "v.", m: "สนับสนุน", i: "/kənˈtrɪbjuːt/" },
+            { w: "contribution", t: "n.", m: "การสนับสนุน/ผลงาน", i: "/ˌkɒntrɪˈbjuːʃn/" },
+            { w: "control", t: "n., v.", m: "ควบคุม", i: "/kənˈtrəʊl/" },
+            { w: "convenient", t: "adj.", m: "สะดวก", i: "/kənˈviːniənt/" },
+            { w: "conversation", t: "n.", m: "การสนทนา", i: "/ˌkɒnvəˈseɪʃn/" },
+            { w: "convert", t: "v.", m: "แปลง", i: "/kənˈvɜːt/" },
+            { w: "convince", t: "v.", m: "โน้มน้าวใจ", i: "/kənˈvɪns/" },
+            { w: "convinced", t: "adj.", m: "เชื่อมั่น", i: "/kənˈvɪnst/" },
+            { w: "cook", t: "v., n.", m: "ทำอาหาร", i: "/kʊk/" },
+            { w: "cooker", t: "n.", m: "หม้อหุงข้าว", i: "/ˈkʊkə(r)/" },
+            { w: "cooking", t: "n.", m: "การทำอาหาร", i: "/ˈkʊkɪŋ/" },
+            { w: "cool", t: "adj., v.", m: "เย็น", i: "/kuːl/" },
+            { w: "copy", t: "n., v.", m: "คัดลอก", i: "/ˈkɒpi/" },
+            { w: "core", t: "n., adj.", m: "แกนกลาง", i: "/kɔː(r)/" },
+            { w: "corner", t: "n.", m: "มุม", i: "/ˈkɔːnə(r)/" },
+            { w: "corporate", t: "adj.", m: "ขององค์กร", i: "/ˈkɔːpərət/" },
+            { w: "correct", t: "adj., v.", m: "ถูกต้อง", i: "/kəˈrekt/" },
+            { w: "correctly", t: "adv.", m: "อย่างถูกต้อง", i: "/kəˈrektli/" },
+            { w: "cost", t: "n., v.", m: "ราคา", i: "/kɒst/" },
+            { w: "costume", t: "n.", m: "เครื่องแต่งกาย", i: "/ˈkɒstjuːm/" },
+            { w: "cottage", t: "n.", m: "กระท่อม", i: "/ˈkɒtɪdʒ/" },
+            { w: "cotton", t: "n.", m: "ฝ้าย", i: "/ˈkɒtn/" },
+            { w: "could", t: "v.", m: "สามารถ(อดีต)", i: "/kʊd/" },
+            { w: "council", t: "n.", m: "สภา", i: "/ˈkaʊnsl/" },
+            { w: "count", t: "v., n.", m: "นับ", i: "/kaʊnt/" },
+            { w: "country", t: "n.", m: "ประเทศ", i: "/ˈkʌntri/" },
+            { w: "countryside", t: "n.", m: "ชนบท", i: "/ˈkʌntrisaɪd/" },
+            { w: "county", t: "n.", m: "เขต", i: "/ˈkaʊnti/" },
+            { w: "couple", t: "n.", m: "คู่", i: "/ˈkʌpl/" },
+            { w: "courage", t: "n.", m: "ความกล้าหาญ", i: "/ˈkʌrɪdʒ/" },
+            { w: "course", t: "n.", m: "หลักสูตร", i: "/kɔːs/" },
+            { w: "court", t: "n.", m: "ศาล", i: "/kɔːt/" },
+            { w: "cousin", t: "n.", m: "ลูกพี่ลูกน้อง", i: "/ˈkʌzn/" },
+            { w: "cover", t: "v., n.", m: "ปกคลุม", i: "/ˈkʌvə(r)/" },
+            { w: "covered", t: "adj.", m: "ถูกปกคลุม", i: "/ˈkʌvəd/" },
+            { w: "cow", t: "n.", m: "วัว", i: "/kaʊ/" },
+            { w: "crash", t: "n., v.", m: "ชน", i: "/kræʃ/" },
+            { w: "crazy", t: "adj.", m: "บ้า", i: "/ˈkreɪzi/" },
+            { w: "cream", t: "n., adj.", m: "ครีม", i: "/kriːm/" },
+            { w: "create", t: "v.", m: "สร้าง", i: "/kriˈeɪt/" },
+            { w: "creation", t: "n.", m: "การสร้าง", i: "/kriˈeɪʃn/" },
+            { w: "creative", t: "adj.", m: "สร้างสรรค์", i: "/kriˈeɪtɪv/" },
+            { w: "creature", t: "n.", m: "สิ่งมีชีวิต", i: "/ˈkriːtʃə(r)/" },
+            { w: "credit", t: "n., v.", m: "เครดิต", i: "/ˈkredɪt/" },
+            { w: "crew", t: "n.", m: "ลูกเรือ", i: "/kruː/" },
+            { w: "crime", t: "n.", m: "อาชญากรรม", i: "/kraɪm/" },
+            { w: "criminal", t: "adj., n.", m: "อาชญากร", i: "/ˈkrɪmɪnl/" },
+            { w: "crisis", t: "n.", m: "วิกฤต", i: "/ˈkraɪsɪs/" },
+            { w: "criterion", t: "n.", m: "เกณฑ์", i: "/kraɪˈtɪəriən/" },
+            { w: "critic", t: "n.", m: "นักวิจารณ์", i: "/ˈkrɪtɪk/" },
+            { w: "critical", t: "adj.", m: "สำคัญยิ่ง/วิกฤต", i: "/ˈkrɪtɪkl/" },
+            { w: "criticism", t: "n.", m: "คำวิจารณ์", i: "/ˈkrɪtɪsɪzəm/" },
+            { w: "criticize", t: "v.", m: "วิจารณ์", i: "/ˈkrɪtɪsaɪz/" },
+            { w: "crop", t: "n.", m: "พืชผล", i: "/krɒp/" },
+            { w: "cross", t: "n., v.", m: "ข้าม / กากบาท", i: "/krɒs/" },
+            { w: "crowd", t: "n.", m: "ฝูงชน", i: "/kraʊd/" },
+            { w: "crowded", t: "adj.", m: "แออัด", i: "/ˈkraʊdɪd/" },
+            { w: "crucial", t: "adj.", m: "สำคัญมาก", i: "/ˈkruːʃl/" },
+            { w: "cruel", t: "adj.", m: "โหดร้าย", i: "/ˈkruːəl/" },
+            { w: "cry", t: "v., n.", m: "ร้องไห้", i: "/kraɪ/" },
+            { w: "cultural", t: "adj.", m: "ทางวัฒนธรรม", i: "/ˈkʌltʃərəl/" },
+            { w: "culture", t: "n.", m: "วัฒนธรรม", i: "/ˈkʌltʃə(r)/" },
+            { w: "cup", t: "n.", m: "ถ้วย", i: "/kʌp/" },
+            { w: "cupboard", t: "n.", m: "ตู้เก็บของ", i: "/ˈkʌbəd/" },
+            { w: "cure", t: "v., n.", m: "รักษา", i: "/kjʊə(r)/" },
+            { w: "curly", t: "adj.", m: "ผมหยิก", i: "/ˈkɜːli/" },
+            { w: "currency", t: "n.", m: "สกุลเงิน", i: "/ˈkʌrənsi/" },
+            { w: "current", t: "adj., n.", m: "ปัจจุบัน / กระแส", i: "/ˈkʌrənt/" },
+            { w: "currently", t: "adv.", m: "ในปัจจุบัน", i: "/ˈkʌrəntli/" },
+            { w: "curtain", t: "n.", m: "ผ้าม่าน", i: "/ˈkɜːtn/" },
+            { w: "curve", t: "n., v.", m: "เส้นโค้ง", i: "/kɜːv/" },
+            { w: "curved", t: "adj.", m: "โค้ง", i: "/kɜːvd/" },
+            { w: "custom", t: "n.", m: "ธรรมเนียม", i: "/ˈkʌstəm/" },
+            { w: "customer", t: "n.", m: "ลูกค้า", i: "/ˈkʌstəmə(r)/" },
+            { w: "cut", t: "v., n.", m: "ตัด", i: "/kʌt/" },
+            { w: "cycle", t: "n., v.", m: "วงจร / ปั่นจักรยาน", i: "/ˈsaɪkl/" },
+            { w: "dad", t: "n.", m: "พ่อ", i: "/dæd/" },
+            { w: "daily", t: "adj., adv.", m: "รายวัน", i: "/ˈdeɪli/" },
+            { w: "damage", t: "n., v.", m: "ความเสียหาย", i: "/ˈdæmɪdʒ/" },
+            { w: "dance", t: "n., v.", m: "เต้นรำ", i: "/dɑːns/" },
+            { w: "dancer", t: "n.", m: "นักเต้น", i: "/ˈdɑːnsə(r)/" },
+            { w: "dancing", t: "n.", m: "การเต้น", i: "/ˈdɑːnsɪŋ/" },
+            { w: "danger", t: "n.", m: "อันตราย", i: "/ˈdeɪndʒə(r)/" },
+            { w: "dangerous", t: "adj.", m: "อันตราย", i: "/ˈdeɪndʒərəs/" },
+            { w: "dark", t: "adj., n.", m: "มืด", i: "/dɑːk/" },
+            { w: "data", t: "n.", m: "ข้อมูล", i: "/ˈdeɪtə/" },
+            { w: "date", t: "n., v.", m: "วันที่ / เดท", i: "/deɪt/" },
+            { w: "daughter", t: "n.", m: "ลูกสาว", i: "/ˈdɔːtə(r)/" },
+            { w: "day", t: "n.", m: "วัน", i: "/deɪ/" },
+            { w: "dead", t: "adj.", m: "ตาย", i: "/ded/" },
+            { w: "deal", t: "v., n.", m: "จัดการ / ข้อตกลง", i: "/diːl/" },
+            { w: "dear", t: "adj.", m: "ที่รัก", i: "/dɪə(r)/" },
+            { w: "death", t: "n.", m: "ความตาย", i: "/deθ/" },
+            { w: "debate", t: "n., v.", m: "อภิปราย", i: "/dɪˈbeɪt/" },
+            { w: "debt", t: "n.", m: "หนี้", i: "/det/" },
+            { w: "decade", t: "n.", m: "ทศวรรษ", i: "/ˈdekeɪd/" },
+            { w: "December", t: "n.", m: "ธันวาคม", i: "/dɪˈsembə(r)/" },
+            { w: "decent", t: "adj.", m: "เหมาะสม/ดีพอ", i: "/ˈdiːsnt/" },
+            { w: "decide", t: "v.", m: "ตัดสินใจ", i: "/dɪˈsaɪd/" },
+            { w: "decision", t: "n.", m: "การตัดสินใจ", i: "/dɪˈsɪʒn/" },
+            { w: "declare", t: "v.", m: "ประกาศ", i: "/dɪˈkleə(r)/" },
+            { w: "decline", t: "v., n.", m: "ลดลง / ปฏิเสธ", i: "/dɪˈklaɪn/" },
+            { w: "decorate", t: "v.", m: "ตกแต่ง", i: "/ˈdekəreɪt/" },
+            { w: "decoration", t: "n.", m: "การตกแต่ง", i: "/ˌdekəˈreɪʃn/" },
+            { w: "decrease", t: "v., n.", m: "ลดลง", i: "/dɪˈkriːs/" },
+            { w: "deep", t: "adj., adv.", m: "ลึก", i: "/diːp/" },
+            { w: "deeply", t: "adv.", m: "อย่างลึกซึ้ง", i: "/ˈdiːpli/" },
+            { w: "defeat", t: "v., n.", m: "ความพ่ายแพ้", i: "/dɪˈfiːt/" },
+            { w: "defence", t: "n.", m: "การป้องกัน", i: "/dɪˈfens/" },
+            { w: "defend", t: "v.", m: "ปกป้อง", i: "/dɪˈfend/" },
+            { w: "define", t: "v.", m: "นิยาม", i: "/dɪˈfaɪn/" },
+            { w: "definite", t: "adj.", m: "แน่นอน", i: "/ˈdefɪnət/" },
+            { w: "definitely", t: "adv.", m: "อย่างแน่นอน", i: "/ˈdefɪnətli/" },
+            { w: "definition", t: "n.", m: "คำนิยาม", i: "/ˌdefɪˈnɪʃn/" },
+            { w: "degree", t: "n.", m: "องศา / ปริญญา", i: "/dɪˈɡriː/" },
+            { w: "delay", t: "v., n.", m: "ล่าช้า", i: "/dɪˈleɪ/" },
+            { w: "delicious", t: "adj.", m: "อร่อย", i: "/dɪˈlɪʃəs/" },
+            { w: "delight", t: "n., v.", m: "ความยินดี", i: "/dɪˈlaɪt/" },
+            { w: "delighted", t: "adj.", m: "ดีใจ", i: "/dɪˈlaɪtɪd/" },
+            { w: "deliver", t: "v.", m: "ส่งมอบ", i: "/dɪˈlɪvə(r)/" },
+            { w: "delivery", t: "n.", m: "การจัดส่ง", i: "/dɪˈlɪvəri/" },
+            { w: "demand", t: "n., v.", m: "ความต้องการ", i: "/dɪˈmɑːnd/" },
+            { w: "demonstrate", t: "v.", m: "สาธิต", i: "/ˈdemənstreɪt/" },
+            { w: "dentist", t: "n.", m: "หมอฟัน", i: "/ˈdentɪst/" },
+            { w: "deny", t: "v.", m: "ปฏิเสธ", i: "/dɪˈnaɪ/" },
+            { w: "department", t: "n.", m: "แผนก", i: "/dɪˈpɑːtmənt/" },
+            { w: "departure", t: "n.", m: "การออกเดินทาง", i: "/dɪˈpɑːtʃə(r)/" },
+            { w: "depend", t: "v.", m: "ขึ้นอยู่กับ", i: "/dɪˈpend/" },
+            { w: "depressed", t: "adj.", m: "หดหู่", i: "/dɪˈprest/" },
+            { w: "depressing", t: "adj.", m: "น่าหดหู่", i: "/dɪˈpresɪŋ/" },
+            { w: "depth", t: "n.", m: "ความลึก", i: "/depθ/" },
+            { w: "describe", t: "v.", m: "บรรยาย", i: "/dɪˈskraɪb/" },
+            { w: "description", t: "n.", m: "คำบรรยาย", i: "/dɪˈskrɪpʃn/" },
+            { w: "desert", t: "n., v.", m: "ทะเลทราย", i: "/ˈdezət/" },
+            { w: "deserve", t: "v.", m: "สมควรได้รับ", i: "/dɪˈzɜːv/" },
+            { w: "design", t: "n., v.", m: "ออกแบบ", i: "/dɪˈzaɪn/" },
+            { w: "designer", t: "n.", m: "นักออกแบบ", i: "/dɪˈzaɪnə(r)/" },
+            { w: "desire", t: "n., v.", m: "ความปรารถนา", i: "/dɪˈzaɪə(r)/" },
+            { w: "desk", t: "n.", m: "โต๊ะทำงาน", i: "/desk/" },
+            { w: "desperate", t: "adj.", m: "หมดหวัง", i: "/ˈdespərət/" },
+            { w: "despite", t: "prep.", m: "แม้ว่า", i: "/dɪˈspaɪt/" },
+            { w: "destroy", t: "v.", m: "ทำลาย", i: "/dɪˈstrɔɪ/" },
+            { w: "detail", t: "n., v.", m: "รายละเอียด", i: "/ˈdiːteɪl/" },
+            { w: "detailed", t: "adj.", m: "ละเอียด", i: "/ˈdiːteɪld/" },
+            { w: "detect", t: "v.", m: "ตรวจจับ", i: "/dɪˈtekt/" },
+            { w: "detective", t: "n.", m: "นักสืบ", i: "/dɪˈtektɪv/" },
+            { w: "determine", t: "v.", m: "กำหนด/ตัดสินใจ", i: "/dɪˈtɜːmɪn/" },
+            { w: "determined", t: "adj.", m: "มุ่งมั่น", i: "/dɪˈtɜːmɪnd/" },
+            { w: "develop", t: "v.", m: "พัฒนา", i: "/dɪˈveləp/" },
+            { w: "development", t: "n.", m: "การพัฒนา", i: "/dɪˈveləpmənt/" },
+            { w: "device", t: "n.", m: "อุปกรณ์", i: "/dɪˈvaɪs/" },
+            { w: "diagram", t: "n.", m: "แผนภาพ", i: "/ˈdaɪəɡræm/" },
+            { w: "dialogue", t: "n.", m: "บทสนทนา", i: "/ˈdaɪəlɒɡ/" },
+            { w: "diamond", t: "n.", m: "เพชร", i: "/ˈdaɪəmənd/" },
+            { w: "diary", t: "n.", m: "ไดอารี่", i: "/ˈdaɪəri/" },
+            { w: "dictionary", t: "n.", m: "พจนานุกรม", i: "/ˈdɪkʃənri/" },
+            { w: "die", t: "v.", m: "ตาย", i: "/daɪ/" },
+            { w: "diet", t: "n.", m: "อาหารการกิน", i: "/ˈdaɪət/" },
+            { w: "difference", t: "n.", m: "ความแตกต่าง", i: "/ˈdɪfrəns/" },
+            { w: "different", t: "adj.", m: "แตกต่าง", i: "/ˈdɪfrənt/" },
+            { w: "differently", t: "adv.", m: "อย่างแตกต่าง", i: "/ˈdɪfrəntli/" },
+            { w: "difficult", t: "adj.", m: "ยาก", i: "/ˈdɪfɪkəlt/" },
+            { w: "difficulty", t: "n.", m: "ความยากลำบาก", i: "/ˈdɪfɪkəlti/" },
+            { w: "dig", t: "v.", m: "ขุด", i: "/dɪɡ/" },
+            { w: "digital", t: "adj.", m: "ดิจิทัล", i: "/ˈdɪdʒɪtl/" },
+            { w: "dinner", t: "n.", m: "อาหารเย็น", i: "/ˈdɪnə(r)/" },
+            { w: "direct", t: "adj., v., adv.", m: "โดยตรง", i: "/dəˈrekt/" },
+            { w: "direction", t: "n.", m: "ทิศทาง", i: "/dəˈrekʃn/" },
+            { w: "directly", t: "adv.", m: "โดยตรง", i: "/dəˈrektli/" },
+            { w: "director", t: "n.", m: "ผู้อำนวยการ", i: "/dəˈrektə(r)/" },
+            { w: "dirt", t: "n.", m: "สิ่งสกปรก", i: "/dɜːt/" },
+            { w: "dirty", t: "adj.", m: "สกปรก", i: "/ˈdɜːti/" },
+            { w: "disadvantage", t: "n.", m: "ข้อเสียเปรียบ", i: "/ˌdɪsədˈvɑːntɪdʒ/" },
+            { w: "disagree", t: "v.", m: "ไม่เห็นด้วย", i: "/ˌdɪsəˈɡriː/" },
+            { w: "disappear", t: "v.", m: "หายไป", i: "/ˌdɪsəˈpɪə(r)/" },
+            { w: "disappointed", t: "adj.", m: "ผิดหวัง", i: "/ˌdɪsəˈpɔɪntɪd/" },
+            { w: "disappointing", t: "adj.", m: "น่าผิดหวัง", i: "/ˌdɪsəˈpɔɪntɪŋ/" },
+            { w: "disaster", t: "n.", m: "ภัยพิบัติ", i: "/dɪˈzɑːstə(r)/" },
+            { w: "disc", t: "n.", m: "แผ่นดิสก์", i: "/dɪsk/" },
+            { w: "discipline", t: "n.", m: "ระเบียบวินัย", i: "/ˈdɪsəplɪn/" },
+            { w: "discount", t: "n., v.", m: "ส่วนลด", i: "/ˈdɪskaʊnt/" },
+            { w: "discover", t: "v.", m: "ค้นพบ", i: "/dɪˈskʌvə(r)/" },
+            { w: "discovery", t: "n.", m: "การค้นพบ", i: "/dɪˈskʌvəri/" },
+            { w: "discuss", t: "v.", m: "หารือ", i: "/dɪˈskʌs/" },
+            { w: "discussion", t: "n.", m: "การอภิปราย", i: "/dɪˈskʌʃn/" },
+            { w: "disease", t: "n.", m: "โรค", i: "/dɪˈziːz/" },
+            { w: "dish", t: "n.", m: "จานอาหาร", i: "/dɪʃ/" },
+            { w: "dishonest", t: "adj.", m: "ไม่ซื่อสัตย์", i: "/dɪsˈɒnɪst/" },
+            { w: "dislike", t: "v., n.", m: "ไม่ชอบ", i: "/dɪsˈlaɪk/" },
+            { w: "dismiss", t: "v.", m: "ไล่ออก/ยกเลิก", i: "/dɪsˈmɪs/" },
+            { w: "display", t: "v., n.", m: "แสดง", i: "/dɪˈspleɪ/" },
+            { w: "distance", t: "n.", m: "ระยะทาง", i: "/ˈdɪstəns/" },
+            { w: "distribute", t: "v.", m: "แจกจ่าย", i: "/dɪˈstrɪbjuːt/" },
+            { w: "distribution", t: "n.", m: "การกระจาย", i: "/ˌdɪstrɪˈbjuːʃn/" },
+            { w: "district", t: "n.", m: "เขต", i: "/ˈdɪstrɪkt/" },
+            { w: "divide", t: "v., n.", m: "แบ่ง", i: "/dɪˈvaɪd/" },
+            { w: "division", t: "n.", m: "แผนก/การแบ่ง", i: "/dɪˈvɪʒn/" },
+            { w: "divorced", t: "adj.", m: "หย่าร้าง", i: "/dɪˈvɔːst/" },
+            { w: "do", t: "v., aux.", m: "ทำ", i: "/duː/" },
+            { w: "doctor", t: "n.", m: "หมอ", i: "/ˈdɒktə(r)/" },
+            { w: "document", t: "n.", m: "เอกสาร", i: "/ˈdɒkjumənt/" },
+            { w: "documentary", t: "n.", m: "สารคดี", i: "/ˌdɒkjuˈmentri/" },
+            { w: "dog", t: "n.", m: "สุนัข", i: "/dɒɡ/" },
+            { w: "dollar", t: "n.", m: "ดอลลาร์", i: "/ˈdɒlə(r)/" },
+            { w: "domestic", t: "adj.", m: "ภายในประเทศ", i: "/dəˈmestɪk/" },
+            { w: "dominate", t: "v.", m: "ครอบงำ", i: "/ˈdɒmɪneɪt/" },
+            { w: "donate", t: "v.", m: "บริจาค", i: "/dəʊˈneɪt/" },
+            { w: "door", t: "n.", m: "ประตู", i: "/dɔː(r)/" },
+            { w: "double", t: "adj., adv., n., v.", m: "สองเท่า", i: "/ˈdʌbl/" },
+            { w: "doubt", t: "n., v.", m: "สงสัย", i: "/daʊt/" },
+            { w: "down", t: "adv., prep.", m: "ลง", i: "/daʊn/" },
+            { w: "download", t: "v., n.", m: "ดาวน์โหลด", i: "/ˌdaʊnˈləʊd/" },
+            { w: "downstairs", t: "adv., adj.", m: "ชั้นล่าง", i: "/ˌdaʊnˈsteəz/" },
+            { w: "downwards", t: "adv.", m: "ลงข้างล่าง", i: "/ˈdaʊnwədz/" },
+            { w: "dozen", t: "n., det.", m: "โหล", i: "/ˈdʌzn/" },
+            { w: "draft", t: "n., v.", m: "ร่าง(เอกสาร)", i: "/drɑːft/" },
+            { w: "drag", t: "v.", m: "ลาก", i: "/dræɡ/" },
+            { w: "drama", t: "n.", m: "ละคร", i: "/ˈdrɑːmə/" },
+            { w: "dramatic", t: "adj.", m: "น่าทึ่ง/ดราม่า", i: "/drəˈmætɪk/" },
+            { w: "draw", t: "v.", m: "วาด", i: "/drɔː/" },
+            { w: "drawing", t: "n.", m: "การวาดภาพ", i: "/ˈdrɔːɪŋ/" },
+            { w: "dream", t: "n., v.", m: "ความฝัน", i: "/driːm/" },
+            { w: "dress", t: "n., v.", m: "ชุด / แต่งตัว", i: "/dres/" },
+            { w: "dressed", t: "adj.", m: "แต่งตัวแล้ว", i: "/drest/" },
+            { w: "drink", t: "n., v.", m: "ดื่ม", i: "/drɪŋk/" },
+            { w: "drive", t: "v., n.", m: "ขับรถ", i: "/draɪv/" },
+            { w: "driver", t: "n.", m: "คนขับ", i: "/ˈdraɪvə(r)/" },
+            { w: "driving", t: "n.", m: "การขับรถ", i: "/ˈdraɪvɪŋ/" },
+            { w: "drop", t: "v., n.", m: "ทำตก / หยด", i: "/drɒp/" },
+            { w: "drug", t: "n.", m: "ยา", i: "/drʌɡ/" },
+            { w: "drum", t: "n.", m: "กลอง", i: "/drʌm/" },
+            { w: "drunk", t: "adj.", m: "เมา", i: "/drʌŋk/" },
+            { w: "dry", t: "adj., v.", m: "แห้ง", i: "/draɪ/" },
+            { w: "due", t: "adj.", m: "ครบกำหนด/เนื่องจาก", i: "/djuː/" },
+            { w: "during", t: "prep.", m: "ในระหว่าง", i: "/ˈdjʊərɪŋ/" },
+            { w: "dust", t: "n.", m: "ฝุ่น", i: "/dʌst/" },
+            { w: "duty", t: "n.", m: "หน้าที่", i: "/ˈdjuːti/" },
+            { w: "DVD", t: "n.", m: "ดีวีดี", i: "/ˌdiː viː ˈdiː/" },
+            { w: "each", t: "det., pron.", m: "แต่ละ", i: "/iːtʃ/" },
+            { w: "ear", t: "n.", m: "หู", i: "/ɪə(r)/" },
+            { w: "early", t: "adj., adv.", m: "แต่เช้า / ก่อนกำหนด", i: "/ˈɜːli/" },
+            { w: "earn", t: "v.", m: "หาเงิน/ได้รับ", i: "/ɜːn/" },
+            { w: "earth", t: "n.", m: "โลก", i: "/ɜːθ/" },
+            { w: "earthquake", t: "n.", m: "แผ่นดินไหว", i: "/ˈɜːθkweɪk/" },
+            { w: "easily", t: "adv.", m: "อย่างง่ายดาย", i: "/ˈiːzəli/" },
+            { w: "east", t: "n., adj., adv.", m: "ทิศตะวันออก", i: "/iːst/" },
+            { w: "eastern", t: "adj.", m: "ทางทิศตะวันออก", i: "/ˈiːstən/" },
+            { w: "easy", t: "adj.", m: "ง่าย", i: "/ˈiːzi/" },
+            { w: "eat", t: "v.", m: "กิน", i: "/iːt/" },
+            { w: "economic", t: "adj.", m: "ทางเศรษฐกิจ", i: "/ˌiːkəˈnɒmɪk/" },
+            { w: "economy", t: "n.", m: "เศรษฐกิจ", i: "/ɪˈkɒnəmi/" },
+            { w: "edge", t: "n.", m: "ขอบ", i: "/edʒ/" },
+            { w: "edit", t: "v.", m: "แก้ไข", i: "/ˈedɪt/" },
+            { w: "edition", t: "n.", m: "ฉบับ(หนังสือ)", i: "/ɪˈdɪʃn/" },
+            { w: "editor", t: "n.", m: "บรรณาธิการ", i: "/ˈedɪtə(r)/" },
+            { w: "educate", t: "v.", m: "ให้การศึกษา", i: "/ˈedʒukeɪt/" },
+            { w: "educated", t: "adj.", m: "มีการศึกษา", i: "/ˈedʒukeɪtɪd/" },
+            { w: "education", t: "n.", m: "การศึกษา", i: "/ˌedʒuˈkeɪʃn/" },
+            { w: "educational", t: "adj.", m: "เกี่ยวกับการศึกษา", i: "/ˌedʒuˈkeɪʃənl/" },
+            { w: "effect", t: "n.", m: "ผลกระทบ", i: "/ɪˈfekt/" },
+            { w: "effective", t: "adj.", m: "มีประสิทธิภาพ", i: "/ɪˈfektɪv/" },
+            { w: "effectively", t: "adv.", m: "อย่างมีผล", i: "/ɪˈfektɪvli/" },
+            { w: "efficient", t: "adj.", m: "มีประสิทธิภาพ(คุ้มค่า)", i: "/ɪˈfɪʃnt/" },
+            { w: "effort", t: "n.", m: "ความพยายาม", i: "/ˈefət/" },
+            { w: "egg", t: "n.", m: "ไข่", i: "/eg/" },
+            { w: "eight", t: "number", m: "แปด", i: "/eɪt/" },
+            { w: "eighteen", t: "number", m: "สิบแปด", i: "/ˌeɪˈtiːn/" },
+            { w: "eighty", t: "number", m: "แปดสิบ", i: "/ˈeɪti/" },
+            { w: "either", t: "det., pron., adv.", m: "ไม่อย่างใดก็อย่างหนึ่ง", i: "/ˈaɪðə(r)/" },
+            { w: "elderly", t: "adj.", m: "สูงอายุ", i: "/ˈeldəli/" },
+            { w: "elect", t: "v.", m: "เลือกตั้ง", i: "/ɪˈlekt/" },
+            { w: "election", t: "n.", m: "การเลือกตั้ง", i: "/ɪˈlekʃn/" },
+            { w: "electric", t: "adj.", m: "ไฟฟ้า", i: "/ɪˈlektrɪk/" },
+            { w: "electrical", t: "adj.", m: "เกี่ยวกับไฟฟ้า", i: "/ɪˈlektrɪkl/" },
+            { w: "electricity", t: "n.", m: "ไฟฟ้า", i: "/ɪˌlekˈtrɪsəti/" },
+            { w: "electronic", t: "adj.", m: "อิเล็กทรอนิกส์", i: "/ɪˌlekˈtrɒnɪk/" },
+            { w: "element", t: "n.", m: "องค์ประกอบ", i: "/ˈelɪmənt/" },
+            { w: "elephant", t: "n.", m: "ช้าง", i: "/ˈelɪfənt/" },
+            { w: "eleven", t: "number", m: "สิบเอ็ด", i: "/ɪˈlevn/" },
+            { w: "else", t: "adv.", m: "อื่น", i: "/els/" },
+            { w: "elsewhere", t: "adv.", m: "ที่อื่น", i: "/ˌelsˈweə(r)/" },
+            { w: "email", t: "n., v.", m: "อีเมล", i: "/ˈiːmeɪl/" },
+            { w: "embarrassed", t: "adj.", m: "อับอาย", i: "/ɪmˈbærəst/" },
+            { w: "embarrassing", t: "adj.", m: "น่าอับอาย", i: "/ɪmˈbærəsɪŋ/" },
+            { w: "emerge", t: "v.", m: "ปรากฏออกมา", i: "/ɪˈmɜːdʒ/" },
+            { w: "emergency", t: "n.", m: "ภาวะฉุกเฉิน", i: "/ɪˈmɜːdʒənsi/" },
+            { w: "emotion", t: "n.", m: "อารมณ์", i: "/ɪˈməʊʃn/" },
+            { w: "emotional", t: "adj.", m: "ทางอารมณ์", i: "/ɪˈməʊʃənl/" },
+            { w: "emphasis", t: "n.", m: "การเน้นย้ำ", i: "/ˈemfəsɪs/" },
+            { w: "emphasize", t: "v.", m: "เน้นย้ำ", i: "/ˈemfəsaɪz/" },
+            { w: "employ", t: "v.", m: "จ้าง", i: "/ɪmˈplɔɪ/" },
+            { w: "employee", t: "n.", m: "ลูกจ้าง", i: "/ɪmˈplɔɪiː/" },
+            { w: "employer", t: "n.", m: "นายจ้าง", i: "/ɪmˈplɔɪə(r)/" },
+            { w: "employment", t: "n.", m: "การจ้างงาน", i: "/ɪmˈplɔɪmənt/" },
+            { w: "empty", t: "adj., v.", m: "ว่างเปล่า", i: "/ˈempti/" },
+            { w: "enable", t: "v.", m: "ทำให้สามารถ", i: "/ɪˈneɪbl/" },
+            { w: "encounter", t: "v., n.", m: "เผชิญหน้า", i: "/ɪnˈkaʊntə(r)/" },
+            { w: "encourage", t: "v.", m: "ให้กำลังใจ", i: "/ɪnˈkʌrɪdʒ/" },
+            { w: "end", t: "n., v.", m: "จบ / ปลาย", i: "/end/" },
+            { w: "ending", t: "n.", m: "ตอนจบ", i: "/ˈendɪŋ/" },
+            { w: "enemy", t: "n.", m: "ศัตรู", i: "/ˈenəmi/" },
+            { w: "energy", t: "n.", m: "พลังงาน", i: "/ˈenədʒi/" },
+            { w: "engage", t: "v.", m: "หมั้น / ว่าจ้าง", i: "/ɪnˈɡeɪdʒ/" },
+            { w: "engaged", t: "adj.", m: "หมั้นแล้ว / ไม่ว่าง", i: "/ɪnˈɡeɪdʒd/" },
+            { w: "engine", t: "n.", m: "เครื่องยนต์", i: "/ˈendʒɪn/" },
+            { w: "engineer", t: "n.", m: "วิศวกร", i: "/ˌendʒɪˈnɪə(r)/" },
+            { w: "engineering", t: "n.", m: "วิศวกรรม", i: "/ˌendʒɪˈnɪərɪŋ/" },
+            { w: "enjoy", t: "v.", m: "สนุก", i: "/ɪnˈdʒɔɪ/" },
+            { w: "enormous", t: "adj.", m: "ใหญ่โต", i: "/ɪˈnɔːməs/" },
+            { w: "enough", t: "det., pron., adv.", m: "พอ", i: "/ɪˈnʌf/" },
+            { w: "enquiry", t: "n.", m: "การสอบถาม", i: "/ɪnˈkwaɪəri/" },
+            { w: "ensure", t: "v.", m: "รับรอง", i: "/ɪnˈʃʊə(r)/" },
+            { w: "enter", t: "v.", m: "เข้า", i: "/ˈentə(r)/" },
+            { w: "entertain", t: "v.", m: "ให้ความบันเทิง", i: "/ˌentəˈteɪn/" },
+            { w: "entertainment", t: "n.", m: "ความบันเทิง", i: "/ˌentəˈteɪnmənt/" },
+            { w: "enthusiasm", t: "n.", m: "ความกระตือรือร้น", i: "/ɪnˈθjuːziæzəm/" },
+            { w: "enthusiastic", t: "adj.", m: "กระตือรือร้น", i: "/ɪnˌθjuːziˈæstɪk/" },
+            { w: "entire", t: "adj.", m: "ทั้งหมด", i: "/ɪnˈtaɪə(r)/" },
+            { w: "entirely", t: "adv.", m: "โดยสิ้นเชิง", i: "/ɪnˈtaɪəli/" },
+            { w: "entrance", t: "n.", m: "ทางเข้า", i: "/ˈentrəns/" },
+            { w: "entry", t: "n.", m: "การเข้า", i: "/ˈentri/" },
+            { w: "environment", t: "n.", m: "สิ่งแวดล้อม", i: "/ɪnˈvaɪrənmənt/" },
+            { w: "environmental", t: "adj.", m: "เกี่ยวกับสิ่งแวดล้อม", i: "/ɪnˌvaɪrənˈmentl/" },
+            { w: "episode", t: "n.", m: "ตอน", i: "/ˈepɪsəʊd/" },
+            { w: "equal", t: "adj., v., n.", m: "เท่ากัน", i: "/ˈiːkwəl/" },
+            { w: "equally", t: "adv.", m: "อย่างเท่าเทียม", i: "/ˈiːkwəli/" },
+            { w: "equipment", t: "n.", m: "อุปกรณ์", i: "/ɪˈkwɪpmənt/" },
+            { w: "error", t: "n.", m: "ข้อผิดพลาด", i: "/ˈerə(r)/" },
+            { w: "escape", t: "v., n.", m: "หลบหนี", i: "/ɪˈskeɪp/" },
+            { w: "especially", t: "adv.", m: "โดยเฉพาะ", i: "/ɪˈspeʃəli/" },
+            { w: "essay", t: "n.", m: "เรียงความ", i: "/ˈeseɪ/" },
+            { w: "essential", t: "adj.", m: "จำเป็น", i: "/ɪˈsenʃl/" },
+            { w: "establish", t: "v.", m: "ก่อตั้ง", i: "/ɪˈstæblɪʃ/" },
+            { w: "estate", t: "n.", m: "อสังหาริมทรัพย์", i: "/ɪˈsteɪt/" },
+            { w: "estimate", t: "v., n.", m: "ประมาณการ", i: "/ˈestɪmət/" },
+            { w: "ethical", t: "adj.", m: "มีจริยธรรม", i: "/ˈeθɪkl/" },
+            { w: "euro", t: "n.", m: "เงินยูโร", i: "/ˈjʊərəʊ/" },
+            { w: "evaluate", t: "v.", m: "ประเมินผล", i: "/ɪˈvæljueɪt/" },
+            { w: "even", t: "adv., adj.", m: "แม้แต่ / สม่ำเสมอ", i: "/ˈiːvn/" },
+            { w: "evening", t: "n.", m: "ตอนเย็น", i: "/ˈiːvnɪŋ/" },
+            { w: "event", t: "n.", m: "เหตุการณ์", i: "/ɪˈvent/" },
+            { w: "eventually", t: "adv.", m: "ในที่สุด", i: "/ɪˈventʃuəli/" },
+            { w: "ever", t: "adv.", m: "เคย", i: "/ˈevə(r)/" },
+            { w: "every", t: "det.", m: "ทุกๆ", i: "/ˈevri/" },
+            { w: "everybody", t: "pron.", m: "ทุกคน", i: "/ˈevribɒdi/" },
+            { w: "everyday", t: "adj.", m: "ทุกวัน", i: "/ˈevrideɪ/" },
+            { w: "everyone", t: "pron.", m: "ทุกคน", i: "/ˈevriwʌn/" },
+            { w: "everything", t: "pron.", m: "ทุกสิ่ง", i: "/ˈevriθɪŋ/" },
+            { w: "everywhere", t: "adv.", m: "ทุกที่", i: "/ˈevriweə(r)/" },
+            { w: "evidence", t: "n.", m: "หลักฐาน", i: "/ˈevɪdəns/" },
+            { w: "evil", t: "adj., n.", m: "ชั่วร้าย", i: "/ˈiːvl/" },
+            { w: "exact", t: "adj.", m: "ถูกต้องแม่นยำ", i: "/ɪɡˈzækt/" },
+            { w: "exactly", t: "adv.", m: "อย่างแน่นอน", i: "/ɪɡˈzæktli/" },
+            { w: "exam", t: "n.", m: "การสอบ", i: "/ɪɡˈzæm/" },
+            { w: "examination", t: "n.", m: "การตรวจสอบ", i: "/ɪɡˌzæmɪˈneɪʃn/" },
+            { w: "examine", t: "v.", m: "ตรวจสอบ", i: "/ɪɡˈzæmɪn/" },
+            { w: "example", t: "n.", m: "ตัวอย่าง", i: "/ɪɡˈzɑːmpl/" },
+            { w: "excellent", t: "adj.", m: "ยอดเยี่ยม", i: "/ˈeksələnt/" },
+            { w: "except", t: "prep., conj.", m: "ยกเว้น", i: "/ɪkˈsept/" },
+            { w: "exchange", t: "v., n.", m: "แลกเปลี่ยน", i: "/ɪksˈtʃeɪndʒ/" },
+            { w: "excited", t: "adj.", m: "ตื่นเต้น", i: "/ɪkˈsaɪtɪd/" },
+            { w: "excitement", t: "n.", m: "ความตื่นเต้น", i: "/ɪkˈsaɪtmənt/" },
+            { w: "exciting", t: "adj.", m: "น่าตื่นเต้น", i: "/ɪkˈsaɪtɪŋ/" },
+            { w: "excuse", t: "n., v.", m: "ข้อแก้ตัว / ขอโทษ", i: "/ɪkˈskjuːs/" },
+            { w: "executive", t: "n., adj.", m: "ผู้บริหาร", i: "/ɪɡˈzekjətɪv/" },
+            { w: "exercise", t: "n., v.", m: "ออกกำลังกาย", i: "/ˈeksəsaɪz/" },
+            { w: "exhibition", t: "n.", m: "นิทรรศการ", i: "/ˌeksɪˈbɪʃn/" },
+            { w: "exist", t: "v.", m: "มีอยู่", i: "/ɪɡˈzɪst/" },
+            { w: "existence", t: "n.", m: "การดำรงอยู่", i: "/ɪɡˈzɪstəns/" },
+            { w: "expand", t: "v.", m: "ขยาย", i: "/ɪkˈspænd/" },
+            { w: "expect", t: "v.", m: "คาดหวัง", i: "/ɪkˈspekt/" },
+            { w: "expectation", t: "n.", m: "ความคาดหวัง", i: "/ˌekspekˈteɪʃn/" },
+            { w: "expected", t: "adj.", m: "ที่คาดหวัง", i: "/ɪkˈspektɪd/" },
+            { w: "expedition", t: "n.", m: "การเดินทางสำรวจ", i: "/ˌekspəˈdɪʃn/" },
+            { w: "expense", t: "n.", m: "ค่าใช้จ่าย", i: "/ɪkˈspens/" },
+            { w: "expensive", t: "adj.", m: "แพง", i: "/ɪkˈspensɪv/" },
+            { w: "experience", t: "n., v.", m: "ประสบการณ์", i: "/ɪkˈspɪəriəns/" },
+            { w: "experienced", t: "adj.", m: "มีประสบการณ์", i: "/ɪkˈspɪəriənst/" },
+            { w: "experiment", t: "n., v.", m: "การทดลอง", i: "/ɪkˈsperɪmənt/" },
+            { w: "expert", t: "n., adj.", m: "ผู้เชี่ยวชาญ", i: "/ˈekspɜːt/" },
+            { w: "explain", t: "v.", m: "อธิบาย", i: "/ɪkˈspleɪn/" },
+            { w: "explanation", t: "n.", m: "คำอธิบาย", i: "/ˌekspləˈneɪʃn/" },
+            { w: "explode", t: "v.", m: "ระเบิด", i: "/ɪkˈspləʊd/" },
+            { w: "exploration", t: "n.", m: "การสำรวจ", i: "/ˌekspləˈreɪʃn/" },
+            { w: "explore", t: "v.", m: "สำรวจ", i: "/ɪkˈsplɔː(r)/" },
+            { w: "explosion", t: "n.", m: "การระเบิด", i: "/ɪkˈspləʊʒn/" },
+            { w: "export", t: "v., n.", m: "ส่งออก", i: "/ˈekspɔːt/" },
+            { w: "expose", t: "v.", m: "เปิดเผย", i: "/ɪkˈspəʊz/" },
+            { w: "express", t: "v., adj.", m: "แสดงออก / ด่วน", i: "/ɪkˈspres/" },
+            { w: "expression", t: "n.", m: "การแสดงออก", i: "/ɪkˈspreʃn/" },
+            { w: "extend", t: "v.", m: "ขยายเวลา", i: "/ɪkˈstend/" },
+            { w: "extent", t: "n.", m: "ขอบเขต", i: "/ɪkˈstent/" },
+            { w: "external", t: "adj.", m: "ภายนอก", i: "/ɪkˈstɜːnl/" },
+            { w: "extra", t: "adj., n., adv.", m: "พิเศษ", i: "/ˈekstrə/" },
+            { w: "extraordinary", t: "adj.", m: "พิเศษ", i: "/ɪkˈstrɔːdnri/" },
+            { w: "extreme", t: "adj., n.", m: "สุดขีด", i: "/ɪkˈstriːm/" },
+            { w: "extremely", t: "adv.", m: "อย่างยิ่ง", i: "/ɪkˈstriːmli/" },
+            { w: "eye", t: "n.", m: "ตา", i: "/aɪ/" },
+            { w: "face", t: "n., v.", m: "หน้า / เผชิญ", i: "/feɪs/" },
+            { w: "facility", t: "n.", m: "สิ่งอำนวยความสะดวก", i: "/fəˈsɪləti/" },
+            { w: "fact", t: "n.", m: "ข้อเท็จจริง", i: "/fækt/" },
+            { w: "factor", t: "n.", m: "ปัจจัย", i: "/ˈfæktə(r)/" },
+            { w: "factory", t: "n.", m: "โรงงาน", i: "/ˈfæktri/" },
+            { w: "fail", t: "v.", m: "ล้มเหลว", i: "/feɪl/" },
+            { w: "failure", t: "n.", m: "ความล้มเหลว", i: "/ˈfeɪljə(r)/" },
+            { w: "fair", t: "adj.", m: "ยุติธรรม", i: "/feə(r)/" },
+            { w: "fairly", t: "adv.", m: "อย่างยุติธรรม/ค่อนข้าง", i: "/ˈfeəli/" },
+            { w: "faith", t: "n.", m: "ศรัทธา", i: "/feɪθ/" },
+            { w: "fall", t: "v., n.", m: "ตก", i: "/fɔːl/" },
+            { w: "false", t: "adj.", m: "เท็จ", i: "/fɔːls/" },
+            { w: "familiar", t: "adj.", m: "คุ้นเคย", i: "/fəˈmɪliə(r)/" },
+            { w: "family", t: "n., adj.", m: "ครอบครัว", i: "/ˈfæməli/" },
+            { w: "famous", t: "adj.", m: "มีชื่อเสียง", i: "/ˈfeɪməs/" },
+            { w: "fan", t: "n.", m: "พัดลม / แฟนคลับ", i: "/fæn/" },
+            { w: "fancy", t: "v., adj.", m: "ชอบ / หรูหรา", i: "/ˈfænsi/" },
+            { w: "far", t: "adv., adj.", m: "ไกล", i: "/fɑː(r)/" },
+            { w: "farm", t: "n.", m: "ฟาร์ม", i: "/fɑːm/" },
+            { w: "farmer", t: "n.", m: "ชาวนา", i: "/ˈfɑːmə(r)/" },
+            { w: "farming", t: "n.", m: "การทำฟาร์ม", i: "/ˈfɑːmɪŋ/" },
+            { w: "fascinating", t: "adj.", m: "น่าหลงใหล", i: "/ˈfæsɪneɪtɪŋ/" },
+            { w: "fashion", t: "n.", m: "แฟชั่น", i: "/ˈfæʃn/" },
+            { w: "fashionable", t: "adj.", m: "ทันสมัย", i: "/ˈfæʃnəbl/" },
+            { w: "fast", t: "adj., adv.", m: "เร็ว", i: "/fɑːst/" },
+            { w: "fasten", t: "v.", m: "รัด(เข็มขัด)", i: "/ˈfɑːsn/" },
+            { w: "fat", t: "adj., n.", m: "อ้วน", i: "/fæt/" },
+            { w: "father", t: "n.", m: "พ่อ", i: "/ˈfɑːðə(r)/" },
+            { w: "fault", t: "n.", m: "ความผิด", i: "/fɔːlt/" },
+            { w: "favour", t: "n., v.", m: "ความช่วยเหลือ", i: "/ˈfeɪvə(r)/" },
+            { w: "favourite", t: "adj., n.", m: "ที่ชื่นชอบ", i: "/ˈfeɪvərɪt/" },
+            { w: "fear", t: "n., v.", m: "ความกลัว", i: "/fɪə(r)/" },
+            { w: "feather", t: "n.", m: "ขนนก", i: "/ˈfeðə(r)/" },
+            { w: "feature", t: "n., v.", m: "คุณสมบัติ", i: "/ˈfiːtʃə(r)/" },
+            { w: "February", t: "n.", m: "กุมภาพันธ์", i: "/ˈfebruəri/" },
+            { w: "fee", t: "n.", m: "ค่าธรรมเนียม", i: "/fiː/" },
+            { w: "feed", t: "v.", m: "ให้อาหาร", i: "/fiːd/" },
+            { w: "feedback", t: "n.", m: "ผลตอบรับ", i: "/ˈfiːdbæk/" },
+            { w: "feel", t: "v.", m: "รู้สึก", i: "/fiːl/" },
+            { w: "feeling", t: "n.", m: "ความรู้สึก", i: "/ˈfiːlɪŋ/" },
+            { w: "fellow", t: "n., adj.", m: "เพื่อน", i: "/ˈfeləʊ/" },
+            { w: "female", t: "adj., n.", m: "เพศหญิง", i: "/ˈfiːmeɪl/" },
+            { w: "fence", t: "n.", m: "รั้ว", i: "/fens/" },
+            { w: "festival", t: "n.", m: "เทศกาล", i: "/ˈfestɪvl/" },
+            { w: "few", t: "det., adj., pron.", m: "เล็กน้อย", i: "/fjuː/" },
+            { w: "fiction", t: "n.", m: "นิยาย", i: "/ˈfɪkʃn/" },
+            { w: "field", t: "n.", m: "สนาม", i: "/fiːld/" },
+            { w: "fifteen", t: "number", m: "สิบห้า", i: "/ˌfɪfˈtiːn/" },
+            { w: "fifth", t: "number", m: "ที่ห้า", i: "/fɪfθ/" },
+            { w: "fifty", t: "number", m: "ห้าสิบ", i: "/ˈfɪfti/" },
+            { w: "fight", t: "v., n.", m: "ต่อสู้", i: "/faɪt/" },
+            { w: "fighting", t: "n.", m: "การต่อสู้", i: "/ˈfaɪtɪŋ/" },
+            { w: "figure", t: "n., v.", m: "รูปร่าง / ตัวเลข", i: "/ˈfɪɡə(r)/" },
+            { w: "file", t: "n., v.", m: "ไฟล์", i: "/faɪl/" },
+            { w: "fill", t: "v.", m: "เติม", i: "/fɪl/" },
+            { w: "film", t: "n., v.", m: "ภาพยนตร์", i: "/fɪlm/" },
+            { w: "final", t: "adj., n.", m: "สุดท้าย", i: "/ˈfaɪnl/" },
+            { w: "finally", t: "adv.", m: "ในที่สุด", i: "/ˈfaɪnəli/" },
+            { w: "finance", t: "n., v.", m: "การเงิน", i: "/ˈfaɪnæns/" },
+            { w: "financial", t: "adj.", m: "ทางการเงิน", i: "/faɪˈnænʃl/" },
+            { w: "find", t: "v.", m: "ค้นหา", i: "/faɪnd/" },
+            { w: "finding", t: "n.", m: "การค้นพบ", i: "/ˈfaɪndɪŋ/" },
+            { w: "fine", t: "adj.", m: "สบายดี / ละเอียด", i: "/faɪn/" },
+            { w: "finger", t: "n.", m: "นิ้วมือ", i: "/ˈfɪŋɡə(r)/" },
+            { w: "finish", t: "v., n.", m: "เสร็จสิ้น", i: "/ˈfɪnɪʃ/" },
+            { w: "fire", t: "n., v.", m: "ไฟ", i: "/ˈfaɪə(r)/" },
+            { w: "firm", t: "n.", m: "บริษัท", i: "/fɜːm/" },
+            { w: "first", t: "det., number, adv.", m: "แรก", i: "/fɜːst/" },
+            { w: "firstly", t: "adv.", m: "ประการแรก", i: "/ˈfɜːstli/" },
+            { w: "fish", t: "n., v.", m: "ปลา", i: "/fɪʃ/" },
+            { w: "fishing", t: "n.", m: "การตกปลา", i: "/ˈfɪʃɪŋ/" },
+            { w: "fit", t: "v., adj.", m: "พอดี", i: "/fɪt/" },
+            { w: "fitness", t: "n.", m: "สมรรถภาพ", i: "/ˈfɪtnəs/" },
+            { w: "five", t: "number", m: "ห้า", i: "/faɪv/" },
+            { w: "fix", t: "v.", m: "ซ่อมแซม", i: "/fɪks/" },
+            { w: "fixed", t: "adj.", m: "คงที่", i: "/fɪkst/" },
+            { w: "flag", t: "n.", m: "ธง", i: "/flæɡ/" },
+            { w: "flame", t: "n.", m: "เปลวไฟ", i: "/fleɪm/" },
+            { w: "flash", t: "n., v.", m: "แฟลช", i: "/flæʃ/" },
+            { w: "flat", t: "adj., n.", m: "แบน / ห้องชุด", i: "/flæt/" },
+            { w: "flexible", t: "adj.", m: "ยืดหยุ่น", i: "/ˈfleksəbl/" },
+            { w: "flight", t: "n.", m: "เที่ยวบิน", i: "/flaɪt/" },
+            { w: "float", t: "v.", m: "ลอย", i: "/fləʊt/" },
+            { w: "flood", t: "n., v.", m: "น้ำท่วม", i: "/flʌd/" },
+            { w: "floor", t: "n.", m: "พื้น", i: "/flɔː(r)/" },
+            { w: "flour", t: "n.", m: "แป้ง", i: "/ˈflaʊə(r)/" },
+            { w: "flow", t: "v., n.", m: "ไหล", i: "/fləʊ/" },
+            { w: "flower", t: "n.", m: "ดอกไม้", i: "/ˈflaʊə(r)/" },
+            { w: "flu", t: "n.", m: "ไข้หวัดใหญ่", i: "/fluː/" },
+            { w: "fly", t: "v., n.", m: "บิน / แมลงวัน", i: "/flaɪ/" },
+            { w: "flying", t: "adj., n.", m: "การบิน", i: "/ˈflaɪɪŋ/" },
+            { w: "focus", t: "v., n.", m: "เพ่งความสนใจ", i: "/ˈfəʊkəs/" },
+            { w: "fold", t: "v., n.", m: "พับ", i: "/fəʊld/" },
+            { w: "folding", t: "adj.", m: "พับได้", i: "/ˈfəʊldɪŋ/" },
+            { w: "folk", t: "n., adj.", m: "ชาวบ้าน / พื้นบ้าน", i: "/fəʊk/" },
+            { w: "follow", t: "v.", m: "ติดตาม", i: "/ˈfɒləʊ/" },
+            { w: "following", t: "adj., n., prep.", m: "ดังต่อไปนี้", i: "/ˈfɒləʊɪŋ/" },
+            { w: "food", t: "n.", m: "อาหาร", i: "/fuːd/" },
+            { w: "foot", t: "n.", m: "เท้า", i: "/fʊt/" },
+            { w: "football", t: "n.", m: "ฟุตบอล", i: "/ˈfʊtbɔːl/" },
+            { w: "for", t: "prep.", m: "สำหรับ", i: "/fɔː(r)/" },
+            { w: "force", t: "n., v.", m: "แรง / บังคับ", i: "/fɔːs/" },
+            { w: "foreign", t: "adj.", m: "ต่างประเทศ", i: "/ˈfɒrən/" },
+            { w: "forest", t: "n.", m: "ป่า", i: "/ˈfɒrɪst/" },
+            { w: "forever", t: "adv.", m: "ตลอดไป", i: "/fəˈrevə(r)/" },
+            { w: "forget", t: "v.", m: "ลืม", i: "/fəˈɡet/" },
+            { w: "forgive", t: "v.", m: "ยกโทษให้", i: "/fəˈɡɪv/" },
+            { w: "fork", t: "n.", m: "ส้อม", i: "/fɔːk/" },
+            { w: "form", t: "n., v.", m: "แบบฟอร์ม / ก่อตัว", i: "/fɔːm/" },
+            { w: "formal", t: "adj.", m: "เป็นทางการ", i: "/ˈfɔːml/" },
+            { w: "former", t: "adj.", m: "ก่อนหน้านี้", i: "/ˈfɔːmə(r)/" },
+            { w: "fortunately", t: "adv.", m: "โชคดี", i: "/ˈfɔːtʃənətli/" },
+            { w: "fortune", t: "n.", m: "โชคชะตา / ทรัพย์สมบัติ", i: "/ˈfɔːtʃuːn/" },
+            { w: "forty", t: "number", m: "สี่สิบ", i: "/ˈfɔːti/" },
+            { w: "forward", t: "adv., adj.", m: "ข้างหน้า", i: "/ˈfɔːwəd/" },
+            { w: "found", t: "v.", m: "ก่อตั้ง", i: "/faʊnd/" },
+            { w: "four", t: "number", m: "สี่", i: "/fɔː(r)/" },
+            { w: "fourteen", t: "number", m: "สิบสี่", i: "/ˌfɔːˈtiːn/" },
+            { w: "fourth", t: "number", m: "ที่สี่", i: "/fɔːθ/" },
+            { w: "frame", t: "n., v.", m: "กรอบ", i: "/freɪm/" },
+            { w: "free", t: "adj., adv., v.", m: "ฟรี / อิสระ", i: "/friː/" },
+            { w: "freedom", t: "n.", m: "เสรีภาพ", i: "/ˈfriːdəm/" },
+            { w: "freeze", t: "v.", m: "แช่แข็ง", i: "/friːz/" },
+            { w: "frequency", t: "n.", m: "ความถี่", i: "/ˈfriːkwənsi/" },
+            { w: "frequently", t: "adv.", m: "บ่อยครั้ง", i: "/ˈfriːkwəntli/" },
+            { w: "fresh", t: "adj.", m: "สด", i: "/freʃ/" },
+            { w: "Friday", t: "n.", m: "วันศุกร์", i: "/ˈfraɪdeɪ/" },
+            { w: "fridge", t: "n.", m: "ตู้เย็น", i: "/frɪdʒ/" },
+            { w: "friend", t: "n.", m: "เพื่อน", i: "/frend/" },
+            { w: "friendly", t: "adj.", m: "เป็นมิตร", i: "/ˈfrendli/" },
+            { w: "friendship", t: "n.", m: "มิตรภาพ", i: "/ˈfrendʃɪp/" },
+            { w: "frighten", t: "v.", m: "ทำให้ตกใจ", i: "/ˈfraɪtn/" },
+            { w: "frightened", t: "adj.", m: "ตกใจ", i: "/ˈfraɪtnd/" },
+            { w: "frightening", t: "adj.", m: "น่ากลัว", i: "/ˈfraɪtnɪŋ/" },
+            { w: "frog", t: "n.", m: "กบ", i: "/frɒɡ/" },
+            { w: "from", t: "prep.", m: "จาก", i: "/frəm/" },
+            { w: "front", t: "n., adj.", m: "ด้านหน้า", i: "/frʌnt/" },
+            { w: "frozen", t: "adj.", m: "แช่แข็ง", i: "/ˈfrəʊzn/" },
+            { w: "fruit", t: "n.", m: "ผลไม้", i: "/fruːt/" },
+            { w: "fry", t: "v.", m: "ทอด", i: "/fraɪ/" },
+            { w: "fuel", t: "n.", m: "เชื้อเพลิง", i: "/ˈfjuːəl/" },
+            { w: "full", t: "adj.", m: "เต็ม", i: "/fʊl/" },
+            { w: "fully", t: "adv.", m: "อย่างเต็มที่", i: "/ˈfʊli/" },
+            { w: "fun", t: "n., adj.", m: "ความสนุก", i: "/fʌn/" },
+            { w: "function", t: "n., v.", m: "หน้าที่ / ทำงาน", i: "/ˈfʌŋkʃn/" },
+            { w: "fund", t: "n., v.", m: "กองทุน", i: "/fʌnd/" },
+            { w: "fundamental", t: "adj.", m: "พื้นฐาน", i: "/ˌfʌndəˈmentl/" },
+            { w: "funding", t: "n.", m: "การระดมทุน", i: "/ˈfʌndɪŋ/" },
+            { w: "funny", t: "adj.", m: "ตลก", i: "/ˈfʌni/" },
+            { w: "fur", t: "n.", m: "ขนสัตว์", i: "/fɜː(r)/" },
+            { w: "furniture", t: "n.", m: "เฟอร์นิเจอร์", i: "/ˈfɜːnɪtʃə(r)/" },
+            { w: "further", t: "adj.", m: "เพิ่มเติม / ไกลกว่า", i: "/ˈfɜːðə(r)/" },
+            { w: "furthermore", t: "adv.", m: "ยิ่งไปกว่านั้น", i: "/ˌfɜːðəˈmɔː(r)/" },
+            { w: "future", t: "n., adj.", m: "อนาคต", i: "/ˈfjuːtʃə(r)/" }
+        ];
+
+        // Phonetic Data (Revised to Symbol & Grapheme)
+        // Question: Symbol, Options: Grapheme(s), Sound: Short Phoneme
+        const phoneticData = [
+            { 
+                symbol: "/θ/", 
+                soundText: "th", 
+                desc: "เสียงไม่สั่น (เอาลิ้นแตะฟันบน)", 
+                word: "th", 
+                type: "consonant",
+                options: ["th", "s", "t", "f"] 
+            },
+            { 
+                symbol: "/ð/", 
+                soundText: "th", 
+                desc: "เสียงสั่นในคอ", 
+                word: "th",
+                type: "consonant", 
+                options: ["th", "d", "v", "z"] 
+            },
+            { 
+                symbol: "/ʃ/", 
+                soundText: "sh", 
+                desc: "เสียง 'Sh' (ปากจู๋)", 
+                word: "sh",
+                type: "consonant", 
+                options: ["sh", "s", "ch", "th"] 
+            },
+            { 
+                symbol: "/tʃ/", 
+                soundText: "ch", 
+                desc: "เสียง 'Ch' (กระแทกเสียง)", 
+                word: "ch",
+                type: "consonant", 
+                options: ["ch", "sh", "tr", "k"] 
+            },
+            { 
+                symbol: "/æ/", 
+                soundText: "a", 
+                desc: "สระ 'แอะ' (ปากกว้าง)", 
+                word: "a",
+                type: "vowel", 
+                options: ["a", "e", "u", "o"] 
+            },
+            { 
+                symbol: "/ʌ/", 
+                soundText: "u", 
+                desc: "สระ 'อะ' (ในลำคอ)", 
+                word: "u",
+                type: "vowel", 
+                options: ["u", "a", "o", "e"] 
+            },
+            { 
+                symbol: "/i:/", 
+                soundText: "ee", 
+                desc: "สระ 'อี' (เสียงยาว)", 
+                word: "ee",
+                type: "vowel", 
+                options: ["ee", "i", "a", "e"] 
+            },
+            { 
+                symbol: "/ɪ/", 
+                soundText: "i", 
+                desc: "สระ 'อิ' (เสียงสั้น)", 
+                word: "i",
+                type: "vowel", 
+                options: ["i", "ee", "ea", "y"] 
+            },
+            { 
+                symbol: "/v/", 
+                soundText: "v", 
+                desc: "ฟันบนแตะริมฝีปากล่าง (สั่น)", 
+                word: "v",
+                type: "consonant", 
+                options: ["v", "f", "w", "b"] 
+            },
+            { 
+                symbol: "/z/", 
+                soundText: "z", 
+                desc: "เสียงสั่นในคอเหมือนผึ้ง", 
+                word: "z",
+                type: "consonant", 
+                options: ["z", "s", "th", "x"] 
+            }
+        ];
+
+        // --- STATE MANAGEMENT ---
+        let currentMode = '';
+        let currentQuestions = [];
+        let currentDataIndex = 0; 
+        let totalAnswered = 0; 
+        let score = 0;
+        let isAnswered = false;
+
+        // Toggle State
+        const ipaToggle = document.getElementById('ipa-toggle');
+        const modeToggleContainer = document.getElementById('mode-toggle-container');
+
+        // --- DOM ELEMENTS ---
+        const menuView = document.getElementById('menu-view');
+        const gameView = document.getElementById('game-view');
+        const resultView = document.getElementById('result-view');
+        const questionContent = document.getElementById('question-content');
+        const optionsContainer = document.getElementById('options-container');
+        // const nextBtn = document.getElementById('next-btn'); // REMOVED (Replaced by tap-to-next)
+        const scoreDisplay = document.getElementById('score-display');
+        const feedbackText = document.getElementById('feedback-text');
+        const feedbackArea = document.getElementById('feedback-area');
+        const questionCount = document.getElementById('question-count');
+        const tapHint = document.getElementById('tap-hint');
+
+        // Listen for toggle change
+        ipaToggle.addEventListener('change', () => {
+            if (currentMode === 'vocab') {
+                renderQuestion(false); // Re-render current question
+            }
+        });
+
+        // --- CORE FUNCTIONS ---
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Helper to generate distractors for Vocab mode
+        function getVocabOptions(correctWordObj, allWords) {
+            let options = [correctWordObj.m]; // Add correct meaning
+            
+            // Pick 3 random unique distractors
+            while (options.length < 4) {
+                const randomItem = allWords[Math.floor(Math.random() * allWords.length)];
+                if (randomItem.m !== correctWordObj.m && !options.includes(randomItem.m)) {
+                    options.push(randomItem.m);
+                }
+            }
+            return shuffleArray(options);
+        }
+
+        function startGame(mode) {
+            currentMode = mode;
+            score = 0;
+            totalAnswered = 0;
+            currentDataIndex = 0;
+            isAnswered = false;
+
+            // Show/Hide Toggle based on mode
+            if (mode === 'vocab') {
+                modeToggleContainer.classList.remove('hidden');
+                modeToggleContainer.classList.add('flex');
+                // Shuffle ALL vocab data once at start
+                currentQuestions = shuffleArray([...vocabRawList]);
+            } else {
+                modeToggleContainer.classList.add('hidden');
+                modeToggleContainer.classList.remove('flex');
+                // Use Phonetic Data
+                currentQuestions = shuffleArray([...phoneticData]);
+            }
+
+            // UI Switch
+            menuView.classList.add('hidden');
+            resultView.classList.add('hidden');
+            gameView.classList.remove('hidden');
+            gameView.classList.add('flex');
+
+            renderQuestion();
+        }
+
+        function speakCurrentWord() {
+            let textToSpeak = "";
+            let rate = 0.8;
+            
+            if (currentMode === 'vocab') {
+                textToSpeak = currentQuestions[currentDataIndex].w;
+            } else {
+                // In Phonetic mode, speak the representative sound text
+                textToSpeak = currentQuestions[currentDataIndex].soundText;
+                rate = 0.6; // Slower for single sounds
+            }
+            
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(textToSpeak);
+                utterance.lang = 'en-US';
+                utterance.rate = rate; 
+                window.speechSynthesis.speak(utterance);
+            } else {
+                console.log("Browser does not support Text-to-Speech");
+            }
+        }
+
+        function renderQuestion(resetOptions = true) {
+            isAnswered = false;
+            // nextBtn.classList.add('hidden');
+            feedbackText.textContent = '';
+            feedbackArea.className = "h-10 flex items-center justify-center cursor-pointer hover:bg-gray-50 rounded-lg transition"; 
+            tapHint.classList.add('hidden');
+
+            const q = currentQuestions[currentDataIndex];
+            scoreDisplay.textContent = score;
+            questionCount.textContent = `ข้อที่ ${totalAnswered + 1}`;
+            
+            let options = [];
+
+            // Render Content based on Mode & Toggle
+            if (currentMode === 'vocab') {
+                const isHiddenMode = ipaToggle.checked;
+                
+                // Generate Dynamic Options for Vocab
+                if (resetOptions) {
+                    options = getVocabOptions(q, vocabRawList);
+                    q.tempOptions = options;
+                } else {
+                    options = q.tempOptions;
+                }
+
+                if (isHiddenMode) {
+                    questionContent.innerHTML = `
+                        <p class="text-sm text-gray-500 font-bold mb-2">ทายศัพท์จากคำอ่าน (IPA)</p>
+                        <h2 class="text-4xl font-extrabold text-indigo-700 mb-4 eng-font tracking-wider bg-indigo-50 p-4 rounded-xl inline-block border-2 border-indigo-100">${q.i}</h2>
+                        <div id="hidden-word-reveal" class="opacity-0 transform translate-y-2 transition-all duration-500">
+                             <p class="text-2xl font-bold text-gray-800 eng-font">${q.w}</p>
+                             <p class="text-sm text-gray-400 italic">${q.t}</p>
+                        </div>
+                    `;
+                } else {
+                    questionContent.innerHTML = `
+                        <h2 class="text-4xl font-extrabold text-indigo-700 mb-2 eng-font">${q.w}</h2>
+                        <p class="text-gray-500 italic mb-2">${q.t}</p>
+                        <p class="text-sm bg-gray-200 inline-block px-2 py-1 rounded text-gray-600 eng-font">${q.i}</p>
+                    `;
+                }
+
+            } else {
+                // Phonetic Mode (Static Options)
+                if (resetOptions) {
+                    options = shuffleArray([...q.options]);
+                    q.tempOptions = options;
+                } else {
+                    options = q.tempOptions;
+                }
+
+                // New Phonetic Display: Big Symbol
+                questionContent.innerHTML = `
+                    <h2 class="text-7xl font-extrabold text-purple-600 mb-2 eng-font">${q.symbol}</h2>
+                    <p class="text-xs text-gray-500 mt-2">${q.desc}</p>
+                    <p class="text-sm mt-4 text-indigo-500 font-bold">สัญลักษณ์นี้คือเสียงตัวอะไร?</p>
+                `;
+            }
+
+            // Render Options
+            optionsContainer.innerHTML = '';
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "w-full bg-white border border-gray-200 py-3 rounded-xl hover:bg-indigo-50 transition text-gray-700 font-medium text-lg shadow-sm active:bg-indigo-100";
+                btn.textContent = opt;
+                btn.onclick = () => checkAnswer(opt, btn);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selectedOption, btnElement) {
+            // TAP TO NEXT LOGIC: If already answered, any click goes to next
+            if (isAnswered) {
+                nextQuestion();
+                return;
+            }
+            
+            isAnswered = true;
+
+            const q = currentQuestions[currentDataIndex];
+            let correctToken = "";
+            
+            if (currentMode === 'vocab') {
+                correctToken = q.m;
+            } else {
+                // In Phonetic mode, the answer is the letter options (which is q.word or we look it up)
+                // Actually in phoneticData, options are e.g. ["th", "s", ...]. 
+                // We need to know which one is correct. 
+                // In phoneticData, q.options contains the answer but we need to check against q.word or similar?
+                // Wait, my phoneticData structure: `word: "Think"` (example word). 
+                // But `options` are ["th", "s"]. 
+                // I need to store the Correct Answer Token explicitly.
+                // In revised data above: `word: "th"` is the Grapheme answer.
+                correctToken = q.word; 
+            }
+
+            if (selectedOption === correctToken) {
+                // Correct
+                score++;
+                btnElement.classList.remove('bg-white', 'border-gray-200');
+                btnElement.classList.add('bg-green-500', 'text-white', 'border-green-600', 'correct-anim');
+                feedbackText.textContent = "ถูกต้อง! Excellent!";
+                feedbackText.className = "text-lg font-bold text-green-600";
+            } else {
+                // Wrong
+                btnElement.classList.remove('bg-white', 'border-gray-200');
+                btnElement.classList.add('bg-red-500', 'text-white', 'border-red-600', 'wrong-anim');
+                feedbackText.textContent = `คำตอบคือ "${correctToken}"`;
+                feedbackText.className = "text-lg font-bold text-red-500";
+
+                // Highlight correct answer
+                const buttons = optionsContainer.getElementsByTagName('button');
+                for (let btn of buttons) {
+                    if (btn.textContent === correctToken) {
+                        btn.classList.add('bg-green-100', 'text-green-800', 'border-green-300');
+                    }
+                }
+            }
+            
+            // Reveal hidden word if in Vocab hidden mode
+            if (currentMode === 'vocab' && ipaToggle.checked) {
+                const hiddenDiv = document.getElementById('hidden-word-reveal');
+                if(hiddenDiv) {
+                    hiddenDiv.classList.remove('opacity-0', 'translate-y-2');
+                }
+            }
+            
+            scoreDisplay.textContent = score;
+            
+            // Show Tap Hint
+            tapHint.classList.remove('hidden');
+            feedbackArea.classList.add('bg-gray-100'); // Highlight feedback area slightly
+        }
+
+        // Global handler for Feedback Area click
+        function handleFeedbackClick() {
+            if (isAnswered) {
+                nextQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            totalAnswered++;
+            currentDataIndex++;
+            
+            // Loop check: Endless Mode
+            if (currentDataIndex >= currentQuestions.length) {
+                currentDataIndex = 0;
+                currentQuestions = shuffleArray(currentQuestions);
+            }
+            
+            renderQuestion();
+        }
+
+        function endGameManually() {
+            showResult();
+        }
+
+        function showResult() {
+            gameView.classList.remove('flex');
+            gameView.classList.add('hidden');
+            resultView.classList.remove('hidden');
+
+            document.getElementById('final-score').textContent = score;
+            document.getElementById('total-score').textContent = totalAnswered;
+
+            const msgElement = document.getElementById('result-message');
+            const percentage = totalAnswered > 0 ? (score / totalAnswered) * 100 : 0;
+
+            if (totalAnswered === 0) {
+                 msgElement.textContent = "ยังไม่ได้เล่นเลย ลองใหม่อีกครั้งนะ";
+            } else if (percentage === 100) {
+                msgElement.textContent = "สุดยอด! ถูกทุกข้อเลย";
+            } else if (percentage >= 80) {
+                msgElement.textContent = "เยี่ยมมาก! แม่นยำสุดๆ";
+            } else if (percentage >= 50) {
+                msgElement.textContent = "เก่งมาก ฝึกฝนต่อไปนะ";
+            } else {
+                msgElement.textContent = "สู้ๆ นะครับ ลองใหม่อีกรอบ";
+            }
+        }
+
+        function retryGame() {
+            if (currentMode) {
+                startGame(currentMode);
+            } else {
+                showMenu();
+            }
+        }
+
+        function showMenu() {
+            resultView.classList.add('hidden');
+            gameView.classList.add('hidden');
+            menuView.classList.remove('hidden');
+        }
+
+    </script>
+</body>
+</html>
