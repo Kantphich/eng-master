@@ -1,0 +1,2252 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prefix & Root Flashcards - Premium</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --bg: #f1f5f9;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-sub: #64748b;
+            --accent: #f5f3ff;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* --- Header --- */
+        header {
+            text-align: center;
+            padding: 10px 0;
+        }
+        header h1 {
+            font-size: 1.5rem;
+            color: var(--primary-dark);
+            font-weight: 800;
+            letter-spacing: -0.025em;
+        }
+
+        /* --- Setup Card --- */
+        .setup-card {
+            background: var(--card-bg);
+            padding: 28px;
+            border-radius: 24px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group { margin-bottom: 20px; }
+        label { 
+            display: block; 
+            margin-bottom: 8px; 
+            font-weight: 600; 
+            font-size: 0.85rem; 
+            color: var(--text-sub);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        select, input {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.2s;
+            background-color: #f8fafc;
+        }
+        select:focus, input:focus { 
+            border-color: var(--primary);
+            background-color: #fff;
+            box-shadow: 0 0 0 4px var(--accent);
+        }
+
+        .range-inputs { display: flex; gap: 12px; }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3);
+        }
+        .btn:active { transform: scale(0.97); }
+        .btn-secondary {
+            background: #94a3b8;
+            box-shadow: none;
+            margin-top: 10px;
+        }
+
+        /* --- Game UI --- */
+        #game-screen { display: none; width: 100%; animation: fadeIn 0.4s ease-out; }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .progress-inner {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-sub);
+        }
+
+        /* --- Flashcard --- */
+        .flashcard {
+            width: 100%;
+            min-height: 460px;
+            background: var(--card-bg);
+            border-radius: 32px;
+            padding: 35px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            overflow: hidden;
+        }
+
+        .flashcard.flipped {
+            background: var(--accent);
+        }
+
+        .badge {
+            position: absolute;
+            top: 25px;
+            padding: 6px 14px;
+            background: var(--accent);
+            color: var(--primary-dark);
+            border-radius: 100px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            box-shadow: inset 0 0 0 1px rgba(99, 102, 241, 0.2);
+            transition: opacity 0.3s ease; /* เพิ่ม transition สำหรับการซ่อน */
+        }
+
+        .card-title {
+            font-size: 3.2rem;
+            font-weight: 800;
+            color: var(--primary-dark);
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            line-height: 1.1;
+        }
+
+        .card-sub-title {
+            font-size: 1.1rem;
+            color: var(--text-sub);
+            margin-top: 10px;
+            transition: opacity 0.3s;
+        }
+
+        /* ปรับระดับการเลื่อนในโหมด Prefix */
+        .mode-prefix.flipped .card-title {
+            font-size: 2.2rem;
+            transform: translateY(-45px);
+        }
+
+        /* ส่วนเฉลย */
+        .reveal-content {
+            width: 100%;
+            margin-top: 10px;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.4s ease-out;
+        }
+        .flipped .reveal-content {
+            opacity: 1;
+            transform: translateY(-10px);
+        }
+
+        .meaning-text {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 22px;
+            line-height: 1.3;
+        }
+
+        .example-card {
+            text-align: left;
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            border-left: 6px solid var(--primary);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        }
+        .ex-label {
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: var(--text-sub);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .ex-en { color: #334155; line-height: 1.5; margin-bottom: 8px; font-size: 0.95rem; font-weight: 500; }
+        .ex-th { color: var(--primary-dark); font-weight: 600; font-size: 0.9rem; line-height: 1.5; opacity: 0.9; }
+
+        .tap-hint {
+            position: absolute;
+            bottom: 25px;
+            font-size: 0.75rem;
+            color: var(--text-sub);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            letter-spacing: 0.02em;
+        }
+        .tap-hint::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.5); opacity: 0.4; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.98) translateY(5px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .hidden { display: none !important; }
+        .invisible { opacity: 0; pointer-events: none; }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="setup-screen">
+        <header>
+            <h1>VOCAB MASTER</h1>
+        </header>
+
+        <div class="setup-card">
+            <div class="form-group">
+                <label>โหมดการฝึก</label>
+                <select id="practice-type" onchange="updateTotalCounter()">
+                    <option value="vocabulary">ซ้อมคำศัพท์ (Vocabulary)</option>
+                    <option value="prefix_only">ซ้อมเฉพาะ Prefix (Root/Prefix)</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="prefix-filter-group">
+                <label>เลือกหมวดหมู่</label>
+                <select id="prefix-filter">
+                    <option value="all">ทั้งหมด (All Items)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>การจัดลำดับ</label>
+                <select id="play-mode">
+                    <option value="order">เรียงตามลำดับ (Sequential)</option>
+                    <option value="random">สุ่มรายการ (Randomize)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>ช่วงลำดับ (รวม <span id="total-count">0</span> รายการ)</label>
+                <div class="range-inputs">
+                    <input type="number" id="range-start" value="1" min="1">
+                    <input type="number" id="range-end" value="10">
+                </div>
+            </div>
+
+            <button class="btn" onclick="initGame()">เริ่มฝึกซ้อม</button>
+        </div>
+    </div>
+
+    <div class="container" id="game-screen">
+        <div class="stats">
+            <span>PROGRESS</span>
+            <span id="progress-text">1 / 10</span>
+        </div>
+        <div class="progress-bar">
+            <div class="progress-inner" id="progress-bar-fill"></div>
+        </div>
+        
+        <div class="flashcard" id="card" onclick="handleCardClick()">
+            <div class="badge" id="card-badge">PREFIX</div>
+            
+            <div class="card-title" id="display-main">Word</div>
+            <div class="card-sub-title" id="display-sub">/phonetic/</div>
+
+            <div class="reveal-content hidden" id="reveal-content">
+                <div class="meaning-text" id="display-meaning">คำแปล</div>
+                <div class="example-card">
+                    <div class="ex-label" id="ex-label-text">Example</div>
+                    <div class="ex-en" id="display-ex-en">Example sentence.</div>
+                    <div class="ex-th" id="display-ex-th">คำแปลประโยค</div>
+                </div>
+            </div>
+
+            <div class="tap-hint" id="hint-text">แตะเพื่อดูเฉลย</div>
+        </div>
+
+        <button class="btn btn-secondary" onclick="exitGame()">เลิกซ้อม</button>
+    </div>
+
+    <script>
+        const rawData = [
+  {
+    "prefix": "a-",
+    "meaning": "not, without",
+    "translation": "ไม่, ปราศจาก",
+    "examples": [
+      {
+        "word": "amoral",
+        "phonetic": "/eɪˈmɔːrəl/",
+        "meaning": "ไร้ศีลธรรม",
+        "sentence": "Although Mr.Smith is the best lawyer in our office, I still don't like him. He is amoral lawyer.",
+        "translation": "ถึงแม้ว่านายสมิธเป็นทนายความที่เก่งที่สุดในบริษัทของเรา ฉันก็ยังคงไม่ชอบเขา เขาเป็นทนายความที่ไม่มีศีลธรรมจรรยา"
+      },
+      {
+        "word": "apathy",
+        "phonetic": "/ˈæpəθi/",
+        "meaning": "ความไม่ใส่ใจ, ไร้ความรู้สึก",
+        "sentence": "I have apathy for the problems that politicians cause for themselves.",
+        "translation": "ฉันไม่ใส่ใจหรอกกับปัญหาต่างๆ ที่นักการเมืองเป็นเหตุให้เกิดขึ้นด้วยตัวของพวกเขาเอง"
+      },
+      {
+        "word": "anarchy",
+        "phonetic": "/ˈænərki/",
+        "meaning": "อนาธิปไตย (บ้านเมืองไม่มีกฎหมาย)",
+        "sentence": "Our country is in complete anarchy.",
+        "translation": "ประเทศของเรานั้นเป็นประเทศที่ปกครองด้วยอนาธิปไตย"
+      },
+      {
+        "word": "asexual",
+        "phonetic": "/eɪˈsekʃuəl/",
+        "meaning": "ไร้เพศ, ไม่เกี่ยวกับเพศ",
+        "sentence": "Most worms are asexual being.",
+        "translation": "หนอนส่วนใหญ่เป็นสิ่งมีชีวิตที่ไม่มีอวัยวะเพศหรือไม่มีเพศนั่นเอง"
+      },
+      {
+        "word": "asymmetry",
+        "phonetic": "/eɪˈsɪmətri/",
+        "meaning": "ความไม่สมดุล",
+        "sentence": "There is a definite asymmetry among the income classes in this country.",
+        "translation": "มีความไม่สมดุลอย่างชัดเจนระหว่างชนชั้นรายได้ในประเทศนี้"
+      }
+    ]
+  },
+  {
+    "prefix": "dis-",
+    "meaning": "not",
+    "translation": "ไม่",
+    "examples": [
+      {
+        "word": "dissimilar",
+        "phonetic": "/dɪˈsɪmɪlər/",
+        "meaning": "ไม่เหมือน, แตกต่าง",
+        "sentence": "A thief is not dissimilar to a crook.",
+        "translation": "ขโมยนั้นไม่ได้แตกต่างจากโจรเลย"
+      },
+      {
+        "word": "dislike",
+        "phonetic": "/dɪsˈlaɪk/",
+        "meaning": "ไม่ชอบ",
+        "sentence": "I dislike the cold season.",
+        "translation": "ฉันไม่ชอบฤดูหนาว"
+      },
+      {
+        "word": "disable",
+        "phonetic": "/dɪsˈeɪbəl/",
+        "meaning": "ทำให้พิการ, ทำให้ใช้งานไม่ได้",
+        "sentence": "If we disable this car, the crook cannot get away.",
+        "translation": "ถ้าเราทำให้รถคันนี้ใช้งานไม่ได้ ขโมยก็ไม่สามารถขับหนีไป"
+      },
+      {
+        "word": "disadvantage",
+        "phonetic": "/ˌdɪsədˈvæntɪdʒ/",
+        "meaning": "ภาวะที่เสียเปรียบ",
+        "sentence": "Children with only parent are at a disadvantage.",
+        "translation": "เด็กๆ ที่มีผู้ปกครองเพียงคนเดียวนั้นอยู่ในฐานะที่เสียเปรียบ"
+      },
+      {
+        "word": "disbelieve",
+        "phonetic": "/ˌdɪsbɪˈliːv/",
+        "meaning": "ไม่เชื่อ",
+        "sentence": "I disbelieve in ghosts.",
+        "translation": "ฉันไม่เชื่อในเรื่องเกี่ยวกับผีสาง"
+      }
+    ]
+  },
+  {
+    "prefix": "in- (im-, il-, ir-)",
+    "meaning": "not",
+    "translation": "ไม่",
+    "examples": [
+      {
+        "word": "inactive",
+        "phonetic": "/ɪnˈæktɪv/",
+        "meaning": "เฉื่อย, ไม่กระตือรือร้น",
+        "sentence": "You will get old very fast if you stay inactive.",
+        "translation": "คุณจะแก่เร็วมากถ้าคุณทำตัวเฉื่อยชา"
+      },
+      {
+        "word": "insane",
+        "phonetic": "/ɪnˈseɪn/",
+        "meaning": "บ้า, วิกลจริต",
+        "sentence": "Most serial killers are insane.",
+        "translation": "ฆาตกรที่ฆ่าคนเรียงกันเป็นตับนั้นส่วนใหญ่เป็นพวกที่สติไม่ปกติ"
+      },
+      {
+        "word": "inconvenient",
+        "phonetic": "/ˌɪnkənˈviːniənt/",
+        "meaning": "ไม่สะดวกสบาย",
+        "sentence": "It is inconvenient to travel by bus in Thailand.",
+        "translation": "มันไม่สะดวกสบายในการเดินทางด้วยรถโดยสารประจำทางในประเทศไทย"
+      },
+      {
+        "word": "illegal",
+        "phonetic": "/ɪˈliːɡəl/",
+        "meaning": "ผิดกฎหมาย",
+        "sentence": "It is illegal to cheat on your taxes.",
+        "translation": "มันผิดกฎหมายที่จะโกงภาษีของตนเอง"
+      },
+      {
+        "word": "illiterate",
+        "phonetic": "/ɪˈlɪtərət/",
+        "meaning": "อ่านไม่ออกเขียนไม่ได้",
+        "sentence": "Bob does not know the price of pizza because he is illiterate.",
+        "translation": "บ็อบไม่รู้ราคาของพิซซ่าเพราะว่าเขาอ่านหนังสือไม่ออก"
+      },
+      {
+        "word": "immortal",
+        "phonetic": "/ɪˈmɔːrtəl/",
+        "meaning": "อมตะ",
+        "sentence": "The king is viewed as immortal.",
+        "translation": "พระมหากษัตริย์นั้นถูกแสดงให้เห็นในฐานะที่เป็นอมตะ"
+      },
+      {
+        "word": "improper",
+        "phonetic": "/ɪmˈprɒpər/",
+        "meaning": "ไม่เหมาะสม",
+        "sentence": "You should not dress improper for temple.",
+        "translation": "คุณไม่ควรที่จะแต่งกายไม่เหมาะสมในวัด"
+      },
+      {
+        "word": "immovable",
+        "phonetic": "/ɪˈmuːvəbəl/",
+        "meaning": "เคลื่อนย้ายไม่ได้",
+        "sentence": "A mountain is an immovable object.",
+        "translation": "ภูเขาเป็นวัตถุที่เคลื่อนย้ายไม่ได้"
+      },
+      {
+        "word": "impossible",
+        "phonetic": "/imˈpɒsəbəl/",
+        "meaning": "เป็นไปไม่ได้",
+        "sentence": "It is almost impossible to climb Mount Everest.",
+        "translation": "มันแทบจะเป็นไปไม่ได้ที่จะปีนเขาเอเวอร์เรส"
+      },
+      {
+        "word": "irrational",
+        "phonetic": "/ɪˈræʃənəl/",
+        "meaning": "ไร้เหตุผล",
+        "sentence": "Her parents and grandparents spoil Cieara, so she is irrational.",
+        "translation": "ผู้ปกครองของเธอและคุณปู่คุณย่านั้นตามใจเซียรามาก ดังนั้นเธอจึงเป็นคนที่ไร้เหตุผล"
+      },
+      {
+        "word": "irrelevant",
+        "phonetic": "/ɪˈreləvənt/",
+        "meaning": "ซึ่งไม่สัมพันธ์กัน",
+        "sentence": "The structure of that sentence is irrelevant to the meaning.",
+        "translation": "โครงสร้างของประโยคนั้นไม่สัมพันธ์กับความหมายของมัน"
+      },
+      {
+        "word": "irreligious",
+        "phonetic": "/ˌɪrɪˈlɪdʒəs/",
+        "meaning": "ไม่เลื่อมใสในศาสนา",
+        "sentence": "If you are irreligious, you are called an atheist.",
+        "translation": "ถ้าคุณไม่เลื่อมใสในศาสนาใดๆ คุณก็จะถูกเรียกว่า คนไร้ศาสนา"
+      }
+    ]
+  },
+  {
+    "prefix": "non-",
+    "meaning": "not",
+    "translation": "ไม่",
+    "examples": [
+      {
+        "word": "nonexistent",
+        "phonetic": "/ˌnɒnɪɡˈzɪstənt/",
+        "meaning": "ซึ่งไม่มีอยู่จริง",
+        "sentence": "Laws to stop corruption are nonexistent.",
+        "translation": "กฎหมายที่จะหยุดการฉ้อโกงนั้นไม่มีอยู่จริง"
+      },
+      {
+        "word": "non-smoker",
+        "phonetic": "/nɒn ˈsmoʊkər/",
+        "meaning": "ผู้ที่ไม่สูบบุหรี่",
+        "sentence": "The newspaper article said the roommate should be a non-smoker.",
+        "translation": "บทความในหนังสือพิมพ์บอกว่าเพื่อนร่วมห้องควรจะเป็นคนที่ไม่สูบบุหรี่"
+      },
+      {
+        "word": "non-political",
+        "phonetic": "/nɒn pəˈlɪtɪkəl/",
+        "meaning": "ไม่เกี่ยวกับการเมือง",
+        "sentence": "This issue with the State is non-political.",
+        "translation": "เรื่องนี้ที่เกี่ยวกับรัฐนั้นไม่เกี่ยวข้องกับการเมือง"
+      },
+      {
+        "word": "non-cooperation",
+        "phonetic": "/nɒn koʊˌɒpəˈreɪʃən/",
+        "meaning": "การไม่ให้ความร่วมมือ",
+        "sentence": "It's hard to get a job done with so much non-cooperation from the workers.",
+        "translation": "มันยากที่จะทำงานได้เสร็จลุล่วงด้วยความไม่ร่วมมือกันจากพนักงาน"
+      }
+    ]
+  },
+  {
+    "prefix": "un-",
+    "meaning": "not / reverse action",
+    "translation": "ไม่ / ตรงข้าม (แก้, ถอด)",
+    "examples": [
+      {
+        "word": "unfair",
+        "phonetic": "/ʌnˈfeər/",
+        "meaning": "ไม่ยุติธรรม",
+        "sentence": "It's unfair to charge more money because of differences in looks.",
+        "translation": "มันไม่ยุติธรรมที่จะคิดเกินราคาเพราะว่าความแตกต่างของลักษณะภายนอก"
+      },
+      {
+        "word": "unintentional",
+        "phonetic": "/ˌʌnɪnˈtenʃənəl/",
+        "meaning": "ไม่เจตนา",
+        "sentence": "It was unintentional that the times were scheduled together.",
+        "translation": "ไม่ได้เจตนาให้เวลาที่ถูกจัดนั้นตรงกัน"
+      },
+      {
+        "word": "unfortunate",
+        "phonetic": "/ʌnˈfɔːrtʃənət/",
+        "meaning": "โชคร้าย",
+        "sentence": "It was very unfortunate for the family when their father passed away.",
+        "translation": "มันช่างโชคร้ายสำหรับครอบครัวเมื่อพ่อของพวกเขาได้เสียชีวิตไป"
+      },
+      {
+        "word": "unselfish",
+        "phonetic": "/ʌnˈselfɪʃ/",
+        "meaning": "ไม่เห็นแก่ตัว",
+        "sentence": "You need to be unselfish to live in my house.",
+        "translation": "เธอจำเป็นที่จะต้องเป็นคนไม่เห็นแก่ตัวในการที่จะพักอาศัยในบ้านของฉัน"
+      },
+      {
+        "word": "undo",
+        "phonetic": "/ʌnˈduː/",
+        "meaning": "ถอด, แก้, ลบล้าง",
+        "sentence": "You cannot undo what has already been done.",
+        "translation": "คุณไม่สามารถลบล้างในสิ่งที่คุณได้กระทำลงไป"
+      },
+      {
+        "word": "unwrap",
+        "phonetic": "/ʌnˈræp/",
+        "meaning": "แกะออก",
+        "sentence": "At Christmas, you get to unwrap lots of presents.",
+        "translation": "งานคริสต์มาส คุณจะแกะของขวัญมากมาย"
+      },
+      {
+        "word": "unleash",
+        "phonetic": "/ʌnˈliːʃ/",
+        "meaning": "ปล่อย (ให้หลุดจากเชือก)",
+        "sentence": "When the police chase criminals, sometimes they unleash their dogs.",
+        "translation": "เมื่อตำรวจวิ่งไล่คนร้ายบางครั้งพวกเขาได้ปล่อยสุนัขของพวกเขา"
+      }
+    ]
+  },
+  {
+    "prefix": "mis-",
+    "meaning": "wrongly, incorrectly",
+    "translation": "ผิด, ไม่ถูกต้อง",
+    "examples": [
+      {
+        "word": "misfortune",
+        "phonetic": "/mɪsˈfɔːrtʃən/",
+        "meaning": "โชคร้าย, เคราะห์กรรม",
+        "sentence": "It was a sad misfortune when the Titanic sank.",
+        "translation": "มันช่างเป็นความโชากร้ายที่น่าเศร้าเมื่อเรือไททานิคจมลง"
+      },
+      {
+        "word": "misdirect",
+        "phonetic": "/ˌmɪsdɪˈrekt/",
+        "meaning": "แนะนำผิด, จ่าหน้าซองผิด",
+        "sentence": "The mail was misdirected and never made it to the office.",
+        "translation": "จดหมายฉบับนั้นได้ถูกจ่าหน้าซองผิดและไม่เคยได้ส่งถึงบริษัทเลย"
+      },
+      {
+        "word": "misunderstand",
+        "phonetic": "/ˌmɪsʌndərˈstænd/",
+        "meaning": "เข้าใจผิด",
+        "sentence": "When you learn a new language, it's so easy to misunderstand the teacher sometimes.",
+        "translation": "เมื่อคุณเรียนภาษาใหม่นั้นมันง่ายมากที่จะเข้าใจคุณครูผิดๆ ในบางครั้ง"
+      },
+      {
+        "word": "misbehave",
+        "phonetic": "/ˌmɪsbɪˈheɪv/",
+        "meaning": "ประพฤติตัวไม่เหมาะสม",
+        "sentence": "If you do not teach your children well, they will most likely misbehave.",
+        "translation": "ถ้าคุณไม่สอนลูกๆ ของคุณดีๆ แล้ว พวกเขาจะประพฤติตัวไม่เหมาะสมเสียเป็นส่วนใหญ่"
+      }
+    ]
+  },
+  {
+    "prefix": "de-",
+    "meaning": "reverse, opposite of",
+    "translation": "ตรงข้าม (ถอด, ลด)",
+    "examples": [
+      {
+        "word": "decode",
+        "phonetic": "/diːˈkoʊd/",
+        "meaning": "ถอดรหัส",
+        "sentence": "When the government intercepts secret messages from other countries, they have to decode them first.",
+        "translation": "เมื่อรัฐบาลขัดขวางข้อความลับจากประเทศอื่นๆ พวกเขาจะต้องถอดรหัสข้อความเหล่านั้นก่อน"
+      },
+      {
+        "word": "desegregation",
+        "phonetic": "/ˌdiːseɡrɪˈɡeɪʃən/",
+        "meaning": "การยกเลิกการแบ่งแยก",
+        "sentence": "Desegregation is one way to show that humans are growing up as a species.",
+        "translation": "การยกเลิกการแบ่งชนชั้นเป็นทางหนึ่งที่แสดงว่า มนุษย์กำลังเจริญเติบโตเป็นอีกประเภทหนึ่ง"
+      },
+      {
+        "word": "deforestation",
+        "phonetic": "/diːˌfɔːrɪˈsteɪʃən/",
+        "meaning": "การตัดไม้ทำลายป่า",
+        "sentence": "Deforestation will destroy many species of animals very fast.",
+        "translation": "การตัดไม้ทำลายป่าจะทำลายสัตว์ต่างๆ มากมายอย่างรวดเร็ว"
+      }
+    ]
+  },
+  {
+    "prefix": "demi-",
+    "meaning": "half",
+    "translation": "ครึ่ง",
+    "examples": [
+      {
+        "word": "demigod",
+        "phonetic": "/ˈdemiɡɒd/",
+        "meaning": "ครึ่งคนครึ่งเทพ",
+        "sentence": "In Greek methology, the demigods were some of the most active in the stories.",
+        "translation": "ในการศึกษาระบบสมัยกรีก เทพที่เกิดจากเทพและมนุษย์เป็นเรื่องที่พูดถึงมากในเรื่องราวต่างๆ"
+      }
+    ]
+  },
+  {
+    "prefix": "hemi-",
+    "meaning": "half",
+    "translation": "ครึ่ง",
+    "examples": [
+      {
+        "word": "hemisphere",
+        "phonetic": "/ˈhemɪsfɪər/",
+        "meaning": "ครึ่งวงกลม, ซีกโลก",
+        "sentence": "The space shuttle has to be careful when it enters the outer hemisphere.",
+        "translation": "กระสวยอวกาศนั้นต้องระวัง เมื่อมันได้เข้าสู่ลูกโลกส่วนนอก"
+      }
+    ]
+  },
+  {
+    "prefix": "semi-",
+    "meaning": "half, part",
+    "translation": "ครึ่ง, กึ่ง",
+    "examples": [
+      {
+        "word": "semicircle",
+        "phonetic": "/ˈsemisɜːrkəl/",
+        "meaning": "ครึ่งวงกลม",
+        "sentence": "Draw a straight line and then make a semicircle 3 inches wide.",
+        "translation": "วาดเส้นตรงและวาดครึ่งวงกลมขนาดกว้าง 3 นิ้ว"
+      },
+      {
+        "word": "semidarkness",
+        "phonetic": "/ˌsemidɑːrknəs/",
+        "meaning": "มืดสลัว",
+        "sentence": "I made my way to the bed in the semidarkness.",
+        "translation": "ฉันเดินกับเตียงในความมืดสลัว"
+      }
+    ]
+  },
+  {
+    "prefix": "mono-",
+    "meaning": "single, alone",
+    "translation": "หนึ่ง, เดียว",
+    "examples": [
+      {
+        "word": "monologue",
+        "phonetic": "/ˈmɒnəlɒɡ/",
+        "meaning": "การพูดคนเดียว",
+        "sentence": "The story was good but the monologue was boring.",
+        "translation": "เรื่องราวนั้นดีแต่บทพูดที่พูดคนเดียวนั้นน่าเบื่อ"
+      },
+      {
+        "word": "monorail",
+        "phonetic": "/ˈmɒnəreɪl/",
+        "meaning": "รถไฟรางเดี่ยว",
+        "sentence": "Let's catch the monorail to work this morning.",
+        "translation": "ขึ้นโมโนเรลไปทำงานเช้านี้กันเถอะ"
+      }
+    ]
+  },
+  {
+    "prefix": "uni-",
+    "meaning": "one",
+    "translation": "หนึ่ง",
+    "examples": [
+      {
+        "word": "unicycle",
+        "phonetic": "/ˈjuːnɪsaɪkəl/",
+        "meaning": "จักรยานล้อเดียว",
+        "sentence": "Today I saw a crown at the circus riding a unicycle.",
+        "translation": "วันนี้ฉันเห็นตัวตลกที่คณะละครสัตว์ขี่จักรยานล้อเดียว"
+      },
+      {
+        "word": "unidirectional",
+        "phonetic": "/ˌjuːnɪdɪˈrekʃənəl/",
+        "meaning": "ทิศทางเดียว",
+        "sentence": "My tires on my car are very expensive. พวกมันเป็นแบบเคลื่อนที่ไปในทิศทางเดียว",
+        "translation": "ยางรถของรถฉันนั้นแพงมาก พวกมันเป็นแบบเคลื่อนที่ไปในทิศทางเดียว"
+      }
+    ]
+  },
+  {
+    "prefix": "proto-",
+    "meaning": "first",
+    "translation": "แรก, ต้นแบบ",
+    "examples": [
+      {
+        "word": "prototype",
+        "phonetic": "/ˈproʊtətaɪp/",
+        "meaning": "ต้นแบบ",
+        "sentence": "This year's model of the RX-7 is a new prototype.",
+        "translation": "รุ่นของ RX-7 ปีนี้ เป็นรูปแบบดั้งเดิมที่ใหม่"
+      }
+    ]
+  },
+  {
+    "prefix": "olig-",
+    "meaning": "few",
+    "translation": "จำนวนน้อย",
+    "examples": [
+      {
+        "word": "oligarchy",
+        "phonetic": "/ˈɒlɪɡɑːrki/",
+        "meaning": "คณาธิปไตย (ปกครองโดยคนกลุ่มน้อย)",
+        "sentence": "Countries governed by oligarchy are very prone to take over.",
+        "translation": "ประเทศที่ปกครองโดยคน 2-3 คนนั้นมีแนวโน้มที่จะถูกยึดอำนาจ"
+      }
+    ]
+  },
+  {
+    "prefix": "multi-",
+    "meaning": "many",
+    "translation": "หลาย, มาก",
+    "examples": [
+      {
+        "word": "multicolor",
+        "phonetic": "/ˌmʌltiˈkʌlər/",
+        "meaning": "มีหลายสี",
+        "sentence": "I think you should wear the multicolor dress because it makes you look beautiful.",
+        "translation": "ฉันคิดว่าคุณควรสวมชุดหลากสีสันเพราะว่ามันทำให้คุณดูสวย"
+      },
+      {
+        "word": "multilingual",
+        "phonetic": "/ˌmʌltiˈlɪŋɡwəl/",
+        "meaning": "พูดได้หลายภาษา",
+        "sentence": "If you want to work here, you have to be multilingual.",
+        "translation": "ถ้าคุณต้องการที่จะทำงานที่นี่ คุณต้องสามารถพูดอ่านได้หลายภาษา"
+      }
+    ]
+  },
+  {
+    "prefix": "poly-",
+    "meaning": "many",
+    "translation": "มาก, หลาย",
+    "examples": [
+      {
+        "word": "polygamy",
+        "phonetic": "/pəˈlɪɡəmi/",
+        "meaning": "การมีคู่ครองหลายคน",
+        "sentence": "In some religions, polygamy is accepted.",
+        "translation": "ในบางศาสนา ประเพณีการมีสามีหรือภรรยามากกว่าหนึ่งคนในเวลาเดียวกันนั้นเป็นที่ยอมรับ"
+      },
+      {
+        "word": "polysyllable",
+        "phonetic": "/ˈpɒlisɪləbəl/",
+        "meaning": "คำที่มีหลายพยางค์",
+        "sentence": "Polysyllable words are the easiest words to remember when you are learning a new language.",
+        "translation": "คำที่มีมากกว่าสามพยางค์นั้นเป็นคำที่ง่ายที่สุดในการจำเมื่อคุณกำลังเรียนภาษาใหม่"
+      }
+    ]
+  },
+  {
+    "prefix": "bi-",
+    "meaning": "two, twice",
+    "translation": "สอง, คู่",
+    "examples": [
+      {
+        "word": "bicycle",
+        "phonetic": "/ˈbaɪsɪkəl/",
+        "meaning": "จักรยาน (สองล้อ)",
+        "sentence": "I usually ride my bicycle to school.",
+        "translation": "ปกติฉันขี่จักรยานสองล้อไปโรงเรียน"
+      },
+      {
+        "word": "bipartisan",
+        "phonetic": "/baɪˈpɑːrtɪzən/",
+        "meaning": "ร่วมมือกันสองฝ่าย",
+        "sentence": "There is a large bipartisan movement in the United States right now.",
+        "translation": "มีการเคลื่อนไหวครั้งใหญ่ของ 2 พรรคในสหรัฐอเมริกาในขณะนี้"
+      }
+    ]
+  },
+  {
+    "prefix": "di-",
+    "meaning": "two",
+    "translation": "สอง",
+    "examples": [
+      {
+        "word": "dipole",
+        "phonetic": "/ˈdaɪpoʊl/",
+        "meaning": "สองขั้ว",
+        "sentence": "A dipole was used in filming the movie 'Frankenstien'.",
+        "translation": "สายอากาศซึ่งมี 2 แฉกถูกใช้ในการถ่ายภาพยนตร์เรื่อง Frankenstien"
+      },
+      {
+        "word": "dioxide",
+        "phonetic": "/daɪˈɒksaɪd/",
+        "meaning": "ไดออกไซด์ (ออกซิเจน 2 อะตอม)",
+        "sentence": "Dioxide can kill people if the concentration is too high.",
+        "translation": "สารประกอบออกไซด์ที่มีออกซิเจน 2 อะตอมกับธาตุอื่น 1 อะตอมสามารถฆ่าคนได้ ถ้ามันเข้มข้นมากๆ"
+      }
+    ]
+  },
+  {
+    "prefix": "tri-",
+    "meaning": "three",
+    "translation": "สาม",
+    "examples": [
+      {
+        "word": "triangle",
+        "phonetic": "/ˈtraɪæŋɡəl/",
+        "meaning": "สามเหลี่ยม",
+        "sentence": "A pyramid looks like a giant triangle from all sides.",
+        "translation": "ปิรามิดดูเหมือนกับสามเหลี่ยมขนาดใหญ่จากการมองทุกๆ ด้าน"
+      },
+      {
+        "word": "tripod",
+        "phonetic": "/ˈtraɪpɒd/",
+        "meaning": "ขาตั้งสามขา",
+        "sentence": "You can take a better picture if you have a tripod for your camera.",
+        "translation": "คุณสามารถได้รูปถ่ายที่ดีขึ้น ถ้าคุณมีขาตั้ง 3 ขาสำหรับกล้องถ่ายรูปของคุณ"
+      }
+    ]
+  },
+  {
+    "prefix": "dec-",
+    "meaning": "ten",
+    "translation": "สิบ",
+    "examples": [
+      {
+        "word": "decagon",
+        "phonetic": "/ˈdekəɡɒn/",
+        "meaning": "รูปสิบเหลี่ยม",
+        "sentence": "A decagon is a very rare naturally occurring shape.",
+        "translation": "รูปสิบเหลี่ยมเป็นรูปแบบที่แทบจะไม่เกิดขึ้นได้เองตามธรรมชาติ"
+      },
+      {
+        "word": "Decalogue",
+        "phonetic": "/ˈdekəlɒɡ/",
+        "meaning": "บัญญัติ 10 ประการ",
+        "sentence": "God bestowed a Decalogue upon his people.",
+        "translation": "พระเจ้าได้มอบบัญญัติ 10 ประการให้กับประชาชน"
+      }
+    ]
+  },
+  {
+    "prefix": "deci-",
+    "meaning": "ten",
+    "translation": "ที่สิบ (1/10)",
+    "examples": [
+      {
+        "word": "decigram",
+        "phonetic": "/ˈdesɪɡræm/",
+        "meaning": "หนึ่งในสิบส่วนของกรัม",
+        "sentence": "A decigram is very small unit of measurement.",
+        "translation": "1 ขีดนั้นเป็นหน่วยวัดที่เล็กมาก"
+      }
+    ]
+  },
+  {
+    "prefix": "centi-",
+    "meaning": "hundred",
+    "translation": "หนึ่งในร้อย (1/100)",
+    "examples": [
+      {
+        "word": "centigram",
+        "phonetic": "/ˈsentɪɡræm/",
+        "meaning": "หนึ่งในร้อยกรัม",
+        "sentence": "A centigram is even smaller than a decigram.",
+        "translation": "0.01 กรัมก็เล็กกว่า 0.1 กรัม"
+      }
+    ]
+  },
+  {
+    "prefix": "hect-",
+    "meaning": "hundred",
+    "translation": "หนึ่งร้อย (100)",
+    "examples": [
+      {
+        "word": "hectogram",
+        "phonetic": "/ˈhektəɡræm/",
+        "meaning": "หนึ่งร้อยกรัม",
+        "sentence": "A hectogram is equal to 100 grams.",
+        "translation": "1 เฮกโตกรัม มีค่าเท่ากับ 100 กรัม"
+      }
+    ]
+  },
+  {
+    "prefix": "micro-",
+    "meaning": "small",
+    "translation": "เล็ก, จิ๋ว",
+    "examples": [
+      {
+        "word": "microfilm",
+        "phonetic": "/ˈmaɪkroʊfɪlm/",
+        "meaning": "ฟิล์มขนาดเล็ก",
+        "sentence": "In spy movies, people are always after the secret microfilm.",
+        "translation": "ในภาพยนตร์สายลับ มักจะตามล่าหาไมโครฟิล์มที่มีความลับอยู่"
+      },
+      {
+        "word": "microscope",
+        "phonetic": "/ˈmaɪkrəskoʊp/",
+        "meaning": "กล้องจุลทรรศน์",
+        "sentence": "A microscope is a very important tool for a scientist.",
+        "translation": "กล้องจุลทรรศน์นั้นเป็นอุปกรณ์ที่สำคัญมากสำหรับนักวิทยาศาสตร์"
+      }
+    ]
+  },
+  {
+    "prefix": "milli-",
+    "meaning": "one-thousandth",
+    "translation": "หนึ่งส่วนพัน",
+    "examples": [
+      {
+        "word": "milligram",
+        "phonetic": "/ˈmɪlɪɡræm/",
+        "meaning": "มิลลิกรัม",
+        "sentence": "When you take medicine, the dose is usually prescribed in milligram.",
+        "translation": "เมื่อคุณต้องรับประทานยา ปริมาณยาปกตินั้นจะถูกระบุในหน่วยมิลลิกรัม"
+      }
+    ]
+  },
+  {
+    "prefix": "macro-",
+    "meaning": "large",
+    "translation": "ใหญ่, มหา",
+    "examples": [
+      {
+        "word": "macrocosm",
+        "phonetic": "/ˈmækrəkoʊzəm/",
+        "meaning": "จักรวาล",
+        "sentence": "In the entire macrocosm, I only met one person like you.",
+        "translation": "ในจักรวาลทั้งหมด ฉันได้พบเพียง 1 คนเช่นเธอ"
+      }
+    ]
+  },
+  {
+    "prefix": "mega-",
+    "meaning": "great",
+    "translation": "ใหญ่, หนึ่งล้าน",
+    "examples": [
+      {
+        "word": "megapolis",
+        "phonetic": "/mɪˈɡæpəlɪs/",
+        "meaning": "มหานคร",
+        "sentence": "Bangkok is considered a megapolis.",
+        "translation": "กรุงเทพมหานครถูกพิจารณาว่า เป็นมหานครหรือเมืองใหญ่"
+      }
+    ]
+  },
+  {
+    "prefix": "magni-",
+    "meaning": "great",
+    "translation": "ใหญ่",
+    "examples": [
+      {
+        "word": "magnific",
+        "phonetic": "/mæɡˈnɪfɪk/",
+        "meaning": "ยิ่งใหญ่, โอ่อ่า",
+        "sentence": "Phuket Fantasy is a magnificent show.",
+        "translation": "การแสดงภูเก็ตแฟนตาซีเป็นการแสดงที่ยิ่งใหญ่"
+      }
+    ]
+  },
+  {
+    "prefix": "ante-",
+    "meaning": "before",
+    "translation": "ก่อน",
+    "examples": [
+      {
+        "word": "antecede",
+        "phonetic": "/ˌæntɪˈsiːd/",
+        "meaning": "นำไปก่อน",
+        "sentence": "The General will antecede the Lieutenant.",
+        "translation": "นายพลจะเดินนำร้อยโท"
+      },
+      {
+        "word": "antedate",
+        "phonetic": "/ˌæntɪˈdeɪt/",
+        "meaning": "ลงวันที่ล่วงหน้า",
+        "sentence": "She had to antedate the check so that she would not be in the trouble with the landlord.",
+        "translation": "เธอต้องลงวันที่ล่วงหน้าในเช็คเพื่อเธอจะได้ไม่มีปัญหากับเจ้าของที่พัก"
+      }
+    ]
+  },
+  {
+    "prefix": "pre-",
+    "meaning": "before",
+    "translation": "ก่อน, ล่วงหน้า",
+    "examples": [
+      {
+        "word": "prearrange",
+        "phonetic": "/ˌpriːəˈreɪndʒ/",
+        "meaning": "จัดเตรียมล่วงหน้า",
+        "sentence": "We must first prearrange everything for the wedding.",
+        "translation": "เราต้องจัดเตรียมทุกอย่างล่วงหน้าสำหรับงานแต่งงาน"
+      },
+      {
+        "word": "precede",
+        "phonetic": "/prɪˈsiːd/",
+        "meaning": "เกิดขึ้นก่อน, นำ",
+        "sentence": "The M.C. will precede the guest of honor.",
+        "translation": "พิธีกรจะเริ่มนำแขกผู้มีเกียรติ"
+      }
+    ]
+  },
+  {
+    "prefix": "fore-",
+    "meaning": "before",
+    "translation": "ก่อน, ข้างหน้า",
+    "examples": [
+      {
+        "word": "forefather",
+        "phonetic": "/ˈfɔːrfɑːðər/",
+        "meaning": "บรรพบุรุษ",
+        "sentence": "You should always learn valuable lessons from your forefathers.",
+        "translation": "คุณควรเรียนบทเรียนที่มีค่าจากบรรพบุรุษอยู่เสมอ"
+      },
+      {
+        "word": "foreknowledge",
+        "phonetic": "/fɔːrˈnɒlɪdʒ/",
+        "meaning": "การรู้ล่วงหน้า",
+        "sentence": "Bin Ladin gave America very little foreknowledge of his attended attack.",
+        "translation": "บิน ลาดินได้ให้เบาะแสล่วงหน้าแก่สหรัฐอเมริกาเพียงเล็กน้อย"
+      }
+    ]
+  },
+  {
+    "prefix": "ex-",
+    "meaning": "former",
+    "translation": "อดีต",
+    "examples": [
+      {
+        "word": "ex-president",
+        "phonetic": "/eks ˈprezɪdənt/",
+        "meaning": "อดีตประธานาธิบดี",
+        "sentence": "Bill Clinton is America's ex-president.",
+        "translation": "บิล คลินตัน เป็นอดีตประธานาธิบดีสหรัฐอเมริกา"
+      }
+    ]
+  },
+  {
+    "prefix": "re-",
+    "meaning": "again, back",
+    "translation": "อีกครั้ง, ย้อนกลับ",
+    "examples": [
+      {
+        "word": "reappear",
+        "phonetic": "/ˌriːəˈpɪər/",
+        "meaning": "ปรากฏขึ้นอีกครั้ง",
+        "sentence": "I hope the rainbow will reappear because I want mom to see it.",
+        "translation": "ฉันหวังว่าสายรุ้งจะปรากฏอีกครั้งหนึ่งเพราะว่าฉันต้องการให้คุณแม่ได้เห็นมัน"
+      },
+      {
+        "word": "reconsider",
+        "phonetic": "/ˌriːkənˈsɪdər/",
+        "meaning": "พิจารณาใหม่",
+        "sentence": "I think you should reconsider Mr.Johnson's offer.",
+        "translation": "ฉันคิดว่าคุณควรจะพิจารณาข้อเสนอของคุณจอห์นสันใหม่อีกครั้ง"
+      }
+    ]
+  },
+  {
+    "prefix": "epi-",
+    "meaning": "after / upon",
+    "translation": "หลัง / บน",
+    "examples": [
+      {
+        "word": "epilogue",
+        "phonetic": "/ˈepɪlɒɡ/",
+        "meaning": "บทส่งท้าย",
+        "sentence": "Often in modern stories, the epilogue is an advertising scheme to promote further episode.",
+        "translation": "บ่อยครั้งในเรื่องราวสมัยใหม่บทปิดท้ายการแสดงเป็นฉากโฆษณาเพื่อแนะนำตอนต่อไป"
+      }
+    ]
+  },
+  {
+    "prefix": "after-",
+    "meaning": "after",
+    "translation": "หลัง",
+    "examples": [
+      {
+        "word": "afterlife",
+        "phonetic": "/ˈæftərlaɪf/",
+        "meaning": "ชีวิตหลังความตาย",
+        "sentence": "We all hope for a happy afterlife.",
+        "translation": "พวกเราทั้งหมดหวังชีวิตหลังความตายที่เป็นสุข"
+      }
+    ]
+  },
+  {
+    "prefix": "post-",
+    "meaning": "after, behind",
+    "translation": "หลัง",
+    "examples": [
+      {
+        "word": "postscript",
+        "phonetic": "/ˈpoʊstskrɪpt/",
+        "meaning": "ปัจฉิมลิขิต (ป.ล.)",
+        "sentence": "I wrote in the postscript for her to send a letter back.",
+        "translation": "ฉันได้เขียนปัจฉิมลิขิตลงท้ายให้เธอส่งจดหมายกลับด้วย"
+      },
+      {
+        "word": "postwar",
+        "phonetic": "/ˌpoʊstˈwɔːr/",
+        "meaning": "หลังสงคราม",
+        "sentence": "The postwar clean-up will take years.",
+        "translation": "การเก็บกวาดทำความสะอาดหลังสงครามนั้นจะใช้เวลานานเป็นปีๆ"
+      }
+    ]
+  },
+  {
+    "prefix": "mid-",
+    "meaning": "middle",
+    "translation": "กลาง",
+    "examples": [
+      {
+        "word": "midday",
+        "phonetic": "/ˌmɪdˈdeɪ/",
+        "meaning": "เที่ยงวัน",
+        "sentence": "I love to have a midday snack.",
+        "translation": "ฉันรักที่จะมีของว่างระหว่างวัน"
+      },
+      {
+        "word": "midsummer",
+        "phonetic": "/ˌmɪdˈsʌmər/",
+        "meaning": "ช่วงกลางฤดูร้อน",
+        "sentence": "Midsummer is the height of the tourist season.",
+        "translation": "ช่วงกลางฤดูร้อนนั้นเป็นช่วงสูงของฤดูการท่องเที่ยว"
+      }
+    ]
+  },
+  {
+    "prefix": "ad-",
+    "meaning": "to, toward",
+    "translation": "ไป, ไปสู่",
+    "examples": [
+      {
+        "word": "accept",
+        "phonetic": "/əkˈsept/",
+        "meaning": "ยอมรับ",
+        "sentence": "Would you please accept my invitation to dinner?",
+        "translation": "คุณกรุณายอมรับคำเชิญสำหรับอาหารเย็นได้ไหม"
+      },
+      {
+        "word": "adduce",
+        "phonetic": "/əˈdjuːs/",
+        "meaning": "อ้างถึง",
+        "sentence": "I adduce this picture for evidence.",
+        "translation": "ฉันอ้างถึงรูปนี้สำหรับหลักฐาน"
+      }
+    ]
+  },
+  {
+    "prefix": "en- (em-)",
+    "meaning": "in, into",
+    "translation": "ใน, เข้าไป",
+    "examples": [
+      {
+        "word": "enroll",
+        "phonetic": "/ɪnˈroʊl/",
+        "meaning": "ลงทะเบียน",
+        "sentence": "I need to enroll for the next semester at school.",
+        "translation": "ฉันต้องการที่จะลงทะเบียนสำหรับภาคเรียนหน้าที่โรงเรียน"
+      },
+      {
+        "word": "envelop",
+        "phonetic": "/ɪnˈveləp/",
+        "meaning": "ห่อหุ้ม, ปกคลุม",
+        "sentence": "The storm is so big and it will envelop the entire city.",
+        "translation": "พายุนั้นช่างแรงมากและมันจะปกคลุมเมืองทั้งหมด"
+      },
+      {
+        "word": "embark",
+        "phonetic": "/ɪmˈbɑːrk/",
+        "meaning": "ลงเรือ, เริ่มเดินทาง",
+        "sentence": "Great explorers have to embark on great journey.",
+        "translation": "นักสำรวจที่ยิ่งใหญ่จะต้องออกเดินทางบนการเดินทางที่ยาวนาน"
+      },
+      {
+        "word": "empower",
+        "phonetic": "/ɪmˈpaʊər/",
+        "meaning": "มอบอำนาจ",
+        "sentence": "A powerful country gets that way by empowering their people with the right to choose.",
+        "translation": "ประเทศที่มีอำนาจได้อำนาจนั้นโดยการมอบอำนาจให้กับประชาชนของเขาด้วยสิทธิ์ในการเลือก"
+      }
+    ]
+  },
+  {
+    "prefix": "in- (im-)",
+    "meaning": "in, into",
+    "translation": "ใน, เข้าไป",
+    "examples": [
+      {
+        "word": "income",
+        "phonetic": "/ˈɪnkʌm/",
+        "meaning": "รายได้",
+        "sentence": "Your income is directly related to your standard of living.",
+        "translation": "รายได้ของคุณนั้นเกี่ยวข้องโดยตรงกับมาตรฐานการกินอยู่ของคุณ"
+      },
+      {
+        "word": "immanent",
+        "phonetic": "/ˈɪmənənt/",
+        "meaning": "ซึ่งฝังอยู่ภายใน",
+        "sentence": "Death is immanent in all creatures with life.",
+        "translation": "ความตายเป็นสิ่งที่ฝังอยู่ในใจในสัตว์ที่มีชีวิต"
+      },
+      {
+        "word": "immerse",
+        "phonetic": "/ɪˈmɜːrs/",
+        "meaning": "จุ่ม, แช่",
+        "sentence": "Christians have to be immersed in holy water when Baptized.",
+        "translation": "ชาวคริสต์ต้องจุ่มน้ำศักดิ์สิทธิ์ในพิธีแบปทิส"
+      },
+      {
+        "word": "illuminate",
+        "phonetic": "/ɪˈluːmɪneɪt/",
+        "meaning": "ส่องสว่าง",
+        "sentence": "Candles are a beautiful way to illuminate a room.",
+        "translation": "เทียนต่างๆ นั้นเป็นวิธีที่สวยงามในการให้ความสว่างแก่ห้อง"
+      },
+      {
+        "word": "irrigate",
+        "phonetic": "/ˈɪrɪɡeɪt/",
+        "meaning": "รดน้ำ, ทดน้ำ",
+        "sentence": "Cambodia was very powerful for many years because of their ability to irrigate their land properly.",
+        "translation": "กัมพูชาเคยมีกำลังมากอยู่หลายปีเพราะความสามารถของพวกเขาในการทำให้ที่ดินของพวกเขาอุดมสมบูรณ์ด้วยการให้น้ำ"
+      },
+      {
+        "word": "irrupt",
+        "phonetic": "/ɪˈrʌpt/",
+        "meaning": "ระเบิดออก",
+        "sentence": "I hope the volcano will not irrupt again.",
+        "translation": "ฉันหวังว่าภูเขาไฟจะไม่ระเบิดอีกครั้ง"
+      }
+    ]
+  },
+  {
+    "prefix": "intra-",
+    "meaning": "within",
+    "translation": "ภายใน",
+    "examples": [
+      {
+        "word": "intraatomic",
+        "phonetic": "/ˌɪntrə.əˈtɒmɪk/",
+        "meaning": "ภายในอะตอม",
+        "sentence": "Scientists are now studying intraatomic make-ups.",
+        "translation": "นักวิทยาศาสตร์กำลังศึกษาการสร้างตัวภายในอะตอมอยู่ในปัจจุบัน"
+      }
+    ]
+  },
+  {
+    "prefix": "intro-",
+    "meaning": "to the inside",
+    "translation": "สู่ข้างใน",
+    "examples": [
+      {
+        "word": "introduce",
+        "phonetic": "/ˌɪntrəˈdjuːs/",
+        "meaning": "แนะนำ",
+        "sentence": "Will you please introduce me to your boss?",
+        "translation": "คุณกรุณาแนะนำฉันให้กับเจ้านายของคุณได้หรือไม่"
+      },
+      {
+        "word": "introspect",
+        "phonetic": "/ˌɪntrəˈspekt/",
+        "meaning": "ใคร่ครวญตัวเอง",
+        "sentence": "Everybody should take sometimes for self-introspection.",
+        "translation": "ทุกคนควรจะให้เวลาบางครั้งในการพิจารณาใคร่ครวญตัวเอง"
+      }
+    ]
+  },
+  {
+    "prefix": "inter-",
+    "meaning": "between, among",
+    "translation": "ระหว่าง",
+    "examples": [
+      {
+        "word": "interchange",
+        "phonetic": "/ˈɪntərtʃeɪndʒ/",
+        "meaning": "แลกเปลี่ยน",
+        "sentence": "You can interchange some parts on the Toyota Tercel and Toyota Corolla.",
+        "translation": "คุณสามารถแลกเปลี่ยนอะไหล่บางส่วนบนรถโตโยต้ารุ่นเทอเซลและโตโยต้ารุ่นโคโรลา"
+      },
+      {
+        "word": "interact",
+        "phonetic": "/ˌɪntərˈækt/",
+        "meaning": "มีปฏิสัมพันธ์",
+        "sentence": "I don't like it when I have to interact with my boss.",
+        "translation": "ฉันไม่ชอบเมื่อฉันต้องตอบโต้กับเจ้านายของฉัน"
+      },
+      {
+        "word": "entertain",
+        "phonetic": "/ˌentərˈteɪn/",
+        "meaning": "ทำให้สนุกสนาน",
+        "sentence": "At my favorite restaurant, they love to entertain their guests.",
+        "translation": "ที่ภัตตาคารสุดโปรดของฉัน พวกเขาชอบให้ความบันเทิงกับแขก"
+      }
+    ]
+  },
+  {
+    "prefix": "epi-",
+    "meaning": "upon, on",
+    "translation": "บน",
+    "examples": [
+      {
+        "word": "epidermis",
+        "phonetic": "/ˌepɪˈdɜːrmɪs/",
+        "meaning": "หนังกำพร้า",
+        "sentence": "You should always scrub your epidermis.",
+        "translation": "คุณควรจะขัดหนังกำพร้าของคุณเสมอๆ"
+      },
+      {
+        "word": "epigram",
+        "phonetic": "/ˈepɪɡræm/",
+        "meaning": "คำคม",
+        "sentence": "I like to keep my unique thoughts in my life by writing short epigrams everytime I get a chance.",
+        "translation": "ฉันชอบที่จะเก็บความคิดที่ไม่เหมือนใครของฉันในชีวิตของฉันด้วยการเขียนเป็นคำคมสั้นๆ ทุกครั้งที่ฉันมีโอกาส"
+      }
+    ]
+  },
+  {
+    "prefix": "super-",
+    "meaning": "over, above",
+    "translation": "เหนือ, สูงกว่า",
+    "examples": [
+      {
+        "word": "superman",
+        "phonetic": "/ˈsuːpərmæn/",
+        "meaning": "ยอดมนุษย์",
+        "sentence": "Superman is not a real person.",
+        "translation": "ยอดมนุษย์ไม่ใช่บุคคลจริงๆ"
+      },
+      {
+        "word": "supernatural",
+        "phonetic": "/ˌsuːpərˈnætʃərəl/",
+        "meaning": "เหนือธรรมชาติ",
+        "sentence": "I do not believe in supernatural powers.",
+        "translation": "ฉันไม่เชื่อในพลังมหัศจรรย์"
+      }
+    ]
+  },
+  {
+    "prefix": "ex-",
+    "meaning": "out, away",
+    "translation": "ออก, จาก",
+    "examples": [
+      {
+        "word": "exchange",
+        "phonetic": "/ɪksˈtʃeɪndʒ/",
+        "meaning": "แลกเปลี่ยน",
+        "sentence": "Can you please exchange this money for me?",
+        "translation": "คุณสามารถแลกเปลี่ยนเงินนี้ให้ฉันได้หรือไม่"
+      },
+      {
+        "word": "exit",
+        "phonetic": "/ˈeɡzɪt/",
+        "meaning": "ทางออก",
+        "sentence": "Where is the exit of the theater?",
+        "translation": "ทางออกของโรงภาพยนตร์อยู่ที่ไหน"
+      },
+      {
+        "word": "exhale",
+        "phonetic": "/eksˈheɪl/",
+        "meaning": "หายใจออก",
+        "sentence": "When diving very deep, you must remember to exhale regularly.",
+        "translation": "เมื่อเราดำน้ำลึกมากๆ คุณต้องจำที่จะหายใจออกอย่างสม่ำเสมอ"
+      }
+    ]
+  },
+  {
+    "prefix": "e-",
+    "meaning": "out, away",
+    "translation": "ออก",
+    "examples": [
+      {
+        "word": "emigrate",
+        "phonetic": "/ˈemɪɡreɪt/",
+        "meaning": "อพยพออก",
+        "sentence": "I have emigrated to Thailand.",
+        "translation": "ฉันได้ย้ายถิ่นที่อยู่มาที่ประเทศไทย"
+      },
+      {
+        "word": "emit",
+        "phonetic": "/iˈmɪt/",
+        "meaning": "ปล่อยออกมา, ส่งออก",
+        "sentence": "Radio stations emit A.M. and F.M. radio waves.",
+        "translation": "สถานีวิทยุได้ส่งทั้งคลื่นวิทยุแบบ A.M. และ F.M."
+      }
+    ]
+  },
+  {
+    "prefix": "mid-",
+    "meaning": "middle",
+    "translation": "กลาง",
+    "examples": [
+      {
+        "word": "midpoint",
+        "phonetic": "/ˈmɪdpɔɪnt/",
+        "meaning": "จุดกึ่งกลาง",
+        "sentence": "We are at the midpoint of this mission.",
+        "translation": "พวกเราอยู่ที่กึ่งกลางของภารกิจนี้"
+      },
+      {
+        "word": "midtown",
+        "phonetic": "/ˈmɪdtaʊn/",
+        "meaning": "ใจกลางเมือง",
+        "sentence": "Please don't take the midtown tunnel at noon.",
+        "translation": "กรุณาอย่าใช้อุโมงค์กลางเมืองตอนเที่ยง"
+      }
+    ]
+  },
+  {
+    "prefix": "para-",
+    "meaning": "beside",
+    "translation": "ข้างเคียง",
+    "examples": [
+      {
+        "word": "paragraph",
+        "phonetic": "/ˈpærəɡræf/",
+        "meaning": "ย่อหน้า",
+        "sentence": "Can you write a short paragraph about your favorite subject in school?",
+        "translation": "คุณสามารถเขียนย่อหน้าสั้นๆ เกี่ยวกับวิชาที่คุณชอบในโรงเรียนได้หรือไม่"
+      },
+      {
+        "word": "parallel",
+        "phonetic": "/ˈpærəlel/",
+        "meaning": "ขนาน",
+        "sentence": "I believe this street is parallel to the interstate.",
+        "translation": "ฉันเชื่อว่าถนนสายนี้ขนานกับทางหลวงนั่น"
+      }
+    ]
+  },
+  {
+    "prefix": "per-",
+    "meaning": "through",
+    "translation": "ตลอด, ผ่าน",
+    "examples": [
+      {
+        "word": "percolate",
+        "phonetic": "/ˈpɜːrkəleɪt/",
+        "meaning": "กรอง, ไหลผ่าน",
+        "sentence": "You must let the coffee percolate for about 15 minutes.",
+        "translation": "คุณต้องปล่อยให้กาแฟไหลผ่านประมาณ 15 นาที"
+      },
+      {
+        "word": "perennial",
+        "phonetic": "/pəˈreniəl/",
+        "meaning": "ที่มีชีวิตอยู่ได้นาน, ตลอดปี",
+        "sentence": "My favorite flowers are perennial flowers.",
+        "translation": "ดอกไม้ที่ฉันชอบคือดอกไม้ที่อยู่ได้ทนนาน"
+      },
+      {
+        "word": "permanent",
+        "phonetic": "/ˈpɜːrmənะnt/",
+        "meaning": "ถาวร",
+        "sentence": "You will always have a permanent position in this company.",
+        "translation": "คุณจะมีตำแหน่งที่ถาวรในบริษัทนี้เสมอ"
+      }
+    ]
+  },
+  {
+    "prefix": "dia-",
+    "meaning": "through, across",
+    "translation": "ผ่าน, ข้าม",
+    "examples": [
+      {
+        "word": "diagonal",
+        "phonetic": "/daɪˈæɡənəl/",
+        "meaning": "เส้นทแยงมุม",
+        "sentence": "Now students should all draw a diagonal line on their papers.",
+        "translation": "ตอนนี้นักเรียนทั้งหมดควรจะวาดเส้นทแยงมุมบนกระดาษของพวกเขา"
+      },
+      {
+        "word": "diarrhea",
+        "phonetic": "/ˌdaɪəˈriːə/",
+        "meaning": "ท้องเสีย",
+        "sentence": "I hate it when I have diarrhea.",
+        "translation": "ฉันเกลียดตอนที่ฉันท้องเสีย"
+      }
+    ]
+  },
+  {
+    "prefix": "circum-",
+    "meaning": "around",
+    "translation": "รอบ",
+    "examples": [
+      {
+        "word": "circumference",
+        "phonetic": "/sərˈkʌmfərəns/",
+        "meaning": "เส้นรอบวง",
+        "sentence": "You can measure the circumference of anything with a formula.",
+        "translation": "คุณสามารถวัดเส้นรอบวงของทุกอย่างได้ด้วยสูตรทางคณิตศาสตร์"
+      },
+      {
+        "word": "circumscribe",
+        "phonetic": "/ˈsɜːrkəmskraɪb/",
+        "meaning": "ลากเส้นล้อมรอบ, จำกัดเขต",
+        "sentence": "I had to first circumscribe my yard before building my fence.",
+        "translation": "ฉันต้องสร้างขอบเขตสนามหญ้าของฉันก่อนที่จะสร้างรั้วบ้านของฉัน"
+      }
+    ]
+  },
+  {
+    "prefix": "peri-",
+    "meaning": "around, near",
+    "translation": "รอบ, ใกล้",
+    "examples": [
+      {
+        "word": "periphery",
+        "phonetic": "/pəˈrɪfəri/",
+        "meaning": "รอบนอก, ขอบเขต",
+        "sentence": "I saw some movement in the corner of my periphery.",
+        "translation": "ฉันได้เห็นการเคลื่อนไหวบางอย่างในมุมของขอบเขตบ้านของฉัน"
+      }
+    ]
+  },
+  {
+    "prefix": "hyper-",
+    "meaning": "over, beyond, too much",
+    "translation": "มากเกินไป",
+    "examples": [
+      {
+        "word": "hyperactive",
+        "phonetic": "/ˌhaɪpərˈæktɪv/",
+        "meaning": "ซุกซนเกินไป",
+        "sentence": "My child was diagnosed by the doctor as being hyperactive.",
+        "translation": "ลูกของฉันถูกวิเคราะห์โดยคุณหมอว่า เป็นโรคที่กระตือรือร้นเกินไป"
+      },
+      {
+        "word": "hypersensitive",
+        "phonetic": "/ˌhaɪpərˈsensɪtɪv/",
+        "meaning": "อ่อนไหวมากเกินไป",
+        "sentence": "Mellisa is hypersensitive to subject about animal cruelty.",
+        "translation": "เมลิซาอ่อนไหวเกินไปในเรื่องที่เกี่ยวกับการใจร้ายต่อสัตว์"
+      }
+    ]
+  },
+  {
+    "prefix": "over-",
+    "meaning": "over, too much",
+    "translation": "มากเกินไป, เหนือ",
+    "examples": [
+      {
+        "word": "overact",
+        "phonetic": "/ˌoʊvərˈækt/",
+        "meaning": "แสดงท่ามากเกินไป",
+        "sentence": "Please don't overact for my parents at the party.",
+        "translation": "กรุณาอย่าแสดงท่าเกินความจริงต่อพ่อแม่ของฉันที่งานเลี้ยง"
+      },
+      {
+        "word": "overcharge",
+        "phonetic": "/ˌoʊvərˈtʃɑːrdʒ/",
+        "meaning": "คิดราคาแพงเกินไป",
+        "sentence": "Be careful at the grocery store so that they do not overcharge you.",
+        "translation": "ระวังที่ร้านขายของชำ เพื่อที่เขาจะได้ไม่คิดราคาให้คุณแพงเกินไป"
+      }
+    ]
+  },
+  {
+    "prefix": "extra-",
+    "meaning": "beyond",
+    "translation": "เหนือกว่าปกติ",
+    "examples": [
+      {
+        "word": "extraordinary",
+        "phonetic": "/ɪkˈstrɔːrdənəri/",
+        "meaning": "พิเศษ, เหนือธรรมดา",
+        "sentence": "That was an extraordinary flip by Carson.",
+        "translation": "นั่นเป็นการตีลังกาที่เหนือธรรมดาโดยคาร์สัน"
+      }
+    ]
+  },
+  {
+    "prefix": "omni-",
+    "meaning": "all",
+    "translation": "ทั้งหมด",
+    "examples": [
+      {
+        "word": "omnipresent",
+        "phonetic": "/ˌɒmnɪˈprezənt/",
+        "meaning": "มีอยู่ทั่วไป",
+        "sentence": "God is an omnipresent force.",
+        "translation": "พระเจ้าเป็นพลังซึ่งมีอยู่ทั่วทุกหนทุกแห่ง"
+      }
+    ]
+  },
+  {
+    "prefix": "out-",
+    "meaning": "greater than",
+    "translation": "ดีกว่า, เหนือกว่า",
+    "examples": [
+      {
+        "word": "outbid",
+        "phonetic": "/ˌaʊtˈbɪd/",
+        "meaning": "ให้ราคาสูงกว่า",
+        "sentence": "At an auction, you must outbid other people to get what you want.",
+        "translation": "ที่สถานที่ประมูลสินค้า คุณต้องให้ราคาสูงกว่าคนอื่นเพื่อที่จะได้สิ่งที่คุณต้องการ"
+      },
+      {
+        "word": "outdo",
+        "phonetic": "/ˌaʊtˈduː/",
+        "meaning": "ทำได้ดีกว่า, ชนะ",
+        "sentence": "Smith is sure to outdo John in the competition.",
+        "translation": "สมิธนั้นมั่นใจว่าจะเอาชนะจอห์นได้ในการแข่งขัน"
+      }
+    ]
+  },
+  {
+    "prefix": "ultra-",
+    "meaning": "beyond, excess",
+    "translation": "เกิน, เลย",
+    "examples": [
+      {
+        "word": "ultrahigh",
+        "phonetic": "/ˌʌltrəˈhaɪ/",
+        "meaning": "สูงเกินไป",
+        "sentence": "They tested their ultrahigh flying airplane today.",
+        "translation": "พวกเขาได้ทดลองการบินที่สูงเกินไปวันนี้"
+      },
+      {
+        "word": "ultramodern",
+        "phonetic": "/ˌʌltrəˈmɒdərn/",
+        "meaning": "ล้ำยุค",
+        "sentence": "I really want to purchase the new ultramodern Panasonic TV.",
+        "translation": "ฉันต้องการที่จะซื้อโทรทัศน์ยี่ห้อพานาโซนิครุ่นใหม่ล้ำยุคนั้นจริงๆ"
+      }
+    ]
+  },
+  {
+    "prefix": "under-",
+    "meaning": "less than",
+    "translation": "ต่ำกว่า, น้อยไป",
+    "examples": [
+      {
+        "word": "understate",
+        "phonetic": "/ˌʌndərˈsteɪt/",
+        "meaning": "พูดน้อยเกินไป",
+        "sentence": "To say Americans are mad with Bin Ladin is to understate the seriousness of their anger.",
+        "translation": "ในการพูดว่าชาวอเมริกันนั้นโกรธ บิน ลาดิน นั้นเป็นคำพูดที่น้อยเกินไปสำหรับความโกรธของพวกเขาที่หนักหนานัก"
+      },
+      {
+        "word": "undersize",
+        "phonetic": "/ˈʌndərsaɪz/",
+        "meaning": "เล็กกว่าปกติ",
+        "sentence": "Don't undersize the tire on your car.",
+        "translation": "อย่าได้คำนวณขนาดของรถคุณเล็กกว่าขนาดปกติ"
+      }
+    ]
+  },
+  {
+    "prefix": "mini-",
+    "meaning": "small, short",
+    "translation": "เล็ก, สั้น",
+    "examples": [
+      {
+        "word": "minibus",
+        "phonetic": "/ˈmɪnɪbʌs/",
+        "meaning": "รถเมล์เล็ก",
+        "sentence": "The minibus is very dangerous.",
+        "translation": "รถประจำทางเล็กนั้นอันตรายมาก"
+      },
+      {
+        "word": "miniseries",
+        "phonetic": "/ˈmɪnisiːriːz/",
+        "meaning": "ละครชุดสั้นๆ",
+        "sentence": "I have a friend who is an actor for a miniseries on television.",
+        "translation": "ฉันมีเพื่อนคนหนึ่งที่เป็นดาราชายในละครชุดทางโทรทัศน์"
+      }
+    ]
+  },
+  {
+    "prefix": "self-",
+    "meaning": "self",
+    "translation": "ตนเอง",
+    "examples": [
+      {
+        "word": "self-confidence",
+        "phonetic": "/self ˈkɒnfɪdəns/",
+        "meaning": "ความมั่นใจในตนเอง",
+        "sentence": "When starting a business, you have to have some self-confidence.",
+        "translation": "เมื่อเริ่มต้นธุรกิจหนึ่ง คุณต้องมีความมั่นใจในตนเองบ้าง"
+      },
+      {
+        "word": "self-educated",
+        "phonetic": "/self ˈedʒukeɪtɪd/",
+        "meaning": "ศึกษาด้วยตนเอง",
+        "sentence": "I am a self-educated man.",
+        "translation": "ฉันเป็นคนที่ศึกษาและฝึกฝนด้วยตนเอง"
+      }
+    ]
+  },
+  {
+    "prefix": "auto-",
+    "meaning": "self",
+    "translation": "ตนเอง, อัตโนมัติ",
+    "examples": [
+      {
+        "word": "autobiography",
+        "phonetic": "/ˌɔːtəbaɪˈɒɡrəfi/",
+        "meaning": "อัตชีวประวัติ",
+        "sentence": "You should read Lord Byron's autobiography.",
+        "translation": "คุณควรอ่านอัตชีวประวัติของลอร์ด ไบรอน"
+      },
+      {
+        "word": "autograph",
+        "phonetic": "/ˈɔːtəɡræf/",
+        "meaning": "ลายเซ็น",
+        "sentence": "Can you please give me your autograph?",
+        "translation": "คุณกรุณาให้ลายเซ็นของคุณได้หรือไม่"
+      }
+    ]
+  },
+  {
+    "prefix": "co-",
+    "meaning": "together",
+    "translation": "ร่วมกัน",
+    "examples": [
+      {
+        "word": "cooperate",
+        "phonetic": "/koʊˈɒpəreɪt/",
+        "meaning": "ร่วมมือ",
+        "sentence": "Would you please cooperate with me?",
+        "translation": "คุณกรุณาร่วมมือกับฉันได้หรือไม่"
+      },
+      {
+        "word": "copartner",
+        "phonetic": "/koʊˈpɑːrtnər/",
+        "meaning": "หุ้นส่วน",
+        "sentence": "Mike is my new copartner.",
+        "translation": "ไมค์เป็นผู้ร่วมลงทุนคนใหม่ของฉัน"
+      }
+    ]
+  },
+  {
+    "prefix": "com- (col-, con-, cor-)",
+    "meaning": "together",
+    "translation": "ร่วมกัน",
+    "examples": [
+      {
+        "word": "commerce",
+        "phonetic": "/ˈkɒmɜːrs/",
+        "meaning": "การค้า",
+        "sentence": "I am not sure who is the commissioner of the commerce in Thailand.",
+        "translation": "ฉันไม่แน่ใจว่า ใครเป็นผู้บัญชาการของสมาคมการค้าในประเทศไทย"
+      },
+      {
+        "word": "commit",
+        "phonetic": "/kəˈmɪt/",
+        "meaning": "ลงมือกระทำ, มอบหมาย",
+        "sentence": "If you want to be professional, you have to commit yourself to your practice.",
+        "translation": "ถ้าคุณต้องการที่จะเป็นมืออาชีพ คุณต้องลงมือฝึกฝนด้วยตัวคุณเอง"
+      },
+      {
+        "word": "compete",
+        "phonetic": "/kəmˈpiːt/",
+        "meaning": "แข่งขัน",
+        "sentence": "Tomorrow he will compete with his best friend.",
+        "translation": "พรุ่งนี้เขาจะเข้าแข่งขันกับเพื่อนที่ดีที่สุดของเขา"
+      },
+      {
+        "word": "collaborate",
+        "phonetic": "/kəˈlæbəreɪt/",
+        "meaning": "ร่วมมือ",
+        "sentence": "It took a lot of people to collaborate the attack on America.",
+        "translation": "มันได้นำคนมากมายในการสมรู้ร่วมคิดกันในการโจมตีสหรัฐอเมริกา"
+      },
+      {
+        "word": "connect",
+        "phonetic": "/kəˈnekt/",
+        "meaning": "เชื่อมโยง",
+        "sentence": "To get the lights to come on, you must first connect the power.",
+        "translation": "ในการที่จะทำให้ไฟสว่างนั้น คุณต้องเชื่อมไฟฟ้าก่อน"
+      },
+      {
+        "word": "correlate",
+        "phonetic": "/ˈkɒrəleɪt/",
+        "meaning": "มีความสัมพันธ์กัน",
+        "sentence": "Both bombings at the World Trade Centers in the last five years were correlated.",
+        "translation": "การระเบิดทั้งคู่ที่ตึกเวิร์ดเทรดเซนเตอร์ในห้าปีหลังนี้มีส่วนเกี่ยวข้องกัน"
+      }
+    ]
+  },
+  {
+    "prefix": "syn-",
+    "meaning": "together",
+    "translation": "ร่วมกัน",
+    "examples": [
+      {
+        "word": "syndrome",
+        "phonetic": "/ˈsɪndroʊm/",
+        "meaning": "กลุ่มอาการโรค",
+        "sentence": "My neighbor's child suffers from an unknown syndrome.",
+        "translation": "ลูกเพื่อนบ้านของฉันทุกข์ทรมานจากกลุ่มอาการของโรคที่ไม่ทราบชื่อ"
+      },
+      {
+        "word": "symphony",
+        "phonetic": "/ˈsɪmfəni/",
+        "meaning": "วงดนตรีวงใหญ่",
+        "sentence": "I love to listen to the music of the symphony.",
+        "translation": "ฉันชอบฟังดนตรีของวงซิมโฟนี"
+      }
+    ]
+  },
+  {
+    "prefix": "pan-",
+    "meaning": "all",
+    "translation": "ทั้งหมด",
+    "examples": [
+      {
+        "word": "panacea",
+        "phonetic": "/ˌpænəˈsiːə/",
+        "meaning": "ยาครอบจักรวาล",
+        "sentence": "We do not have a panacea for AIDS.",
+        "translation": "เราไม่มียาวิเศษสำหรับรักษาโรคเอดส์"
+      },
+      {
+        "word": "pandemic",
+        "phonetic": "/pænˈdemɪk/",
+        "meaning": "ซึ่งระบาดไปทั่ว",
+        "sentence": "This new disease has potential to be pandemic.",
+        "translation": "โรคใหม่นี้มีศักยภาพที่จะแพร่ระบาดได้"
+      }
+    ]
+  },
+  {
+    "prefix": "anti-",
+    "meaning": "against",
+    "translation": "ต่อต้าน",
+    "examples": [
+      {
+        "word": "antipathy",
+        "phonetic": "/ænˈtɪpəθi/",
+        "meaning": "ความเกลียดชัง",
+        "sentence": "America has antipathy for Bin Ladin.",
+        "translation": "อเมริกามีความเกลียดชังให้กับ บิน ลาดิน"
+      },
+      {
+        "word": "antismoking",
+        "phonetic": "/ˌæntiˈsmoʊkɪŋ/",
+        "meaning": "ต่อต้านการสูบบุหรี่",
+        "sentence": "My family is antismoking.",
+        "translation": "ครอบครัวของฉันเป็นพวกต่อต้านการสูบบุหรี่"
+      }
+    ]
+  },
+  {
+    "prefix": "contra-",
+    "meaning": "against",
+    "translation": "ต่อต้าน, แย้ง",
+    "examples": [
+      {
+        "word": "contradict",
+        "phonetic": "/ˌkɒntrəˈdɪkt/",
+        "meaning": "โต้แย้ง, ขัดแย้ง",
+        "sentence": "If you claim to be religious and then kill somebody, you have contradicted yourself.",
+        "translation": "ถ้าคุณบอกว่า คุณเป็นผู้นับถือศาสนาแล้วคุณก็ฆ่าคนบางคน คุณได้ต่อต้านขัดแย้งในตัวคุณเอง"
+      }
+    ]
+  },
+  {
+    "prefix": "counter-",
+    "meaning": "against",
+    "translation": "ต่อต้าน",
+    "examples": [
+      {
+        "word": "counteract",
+        "phonetic": "/ˌkaʊntərˈækt/",
+        "meaning": "ขัดขวาง, ตอบโต้",
+        "sentence": "Take this medicine to counteract the poison.",
+        "translation": "รับประทานยานี้เพื่อขัดขวางยาพิษ"
+      }
+    ]
+  },
+  {
+    "prefix": "dys-",
+    "meaning": "bad",
+    "translation": "ไม่ดี, ผิดปกติ",
+    "examples": [
+      {
+        "word": "dysfunction",
+        "phonetic": "/dɪsˈfʌŋkʃən/",
+        "meaning": "ทำหน้าที่ผิดปกติ",
+        "sentence": "Fifty percents of all families suffer from some sorts of dysfunction.",
+        "translation": "ห้าสิบเปอร์เซ็นต์ของครอบครัวทั้งหมดได้รับทุกข์ทรมานจากการทำหน้าที่ผิดปกติของร่างกายบางอย่าง"
+      }
+    ]
+  },
+  {
+    "prefix": "mal-",
+    "meaning": "bad",
+    "translation": "เลว, ผิดปกติ",
+    "examples": [
+      {
+        "word": "malfunction",
+        "phonetic": "/mælˈfʌŋkʃən/",
+        "meaning": "ทำงานผิดปกติ",
+        "sentence": "My computer does not work due to some malfunction in the mainboard.",
+        "translation": "คอมพิวเตอร์ของฉันไม่ทำงาน เนื่องจากความผิดปกติของหน้าที่บางอย่างในแผ่นวงจรหลัก"
+      }
+    ]
+  },
+  {
+    "prefix": "bene-",
+    "meaning": "good",
+    "translation": "ดี",
+    "examples": [
+      {
+        "word": "benediction",
+        "phonetic": "/ˌbenɪˈdɪkʃən/",
+        "meaning": "การอวยพร",
+        "sentence": "The President gave his benediction speech at noon today.",
+        "translation": "ท่านประธานาธิบดีได้ให้คำอวยพรตอนเที่ยงวันนี้"
+      }
+    ]
+  },
+  {
+    "prefix": "eu-",
+    "meaning": "good",
+    "translation": "ดี",
+    "examples": [
+      {
+        "word": "euphoria",
+        "phonetic": "/juːˈfɔːriə/",
+        "meaning": "ความปลื้มปีติ",
+        "sentence": "Music can bring about mass euphoria.",
+        "translation": "ดนตรีสามารถนำพาความปลื้มปีติมากมาย"
+      }
+    ]
+  },
+  {
+    "prefix": "tele-",
+    "meaning": "distance",
+    "translation": "ไกล",
+    "examples": [
+      {
+        "word": "television",
+        "phonetic": "/ˈtelɪvɪʒən/",
+        "meaning": "วิทยุโทรทัศน์"
+      },
+      {
+        "word": "telecommunication",
+        "phonetic": "/ˌtelikəmjuːnɪˈkeɪʃən/",
+        "meaning": "การโทรคมนาคม"
+      }
+    ]
+  },
+  {
+    "prefix": "tele-",
+    "meaning": "distance",
+    "translation": "ไกล",
+    "examples": [
+      {
+        "word": "television",
+        "phonetic": "/ˈtelɪvɪʒən/",
+        "meaning": "วิทยุโทรทัศน์"
+      },
+      {
+        "word": "telecommunication",
+        "phonetic": "/ˌtelikəmjuːnɪˈkeɪʃən/",
+        "meaning": "การโทรคมนาคม"
+      }
+    ]
+  },
+  {
+    "prefix": "trans-",
+    "meaning": "across, change",
+    "translation": "ข้าม, เปลี่ยน",
+    "examples": [
+      {
+        "word": "transport",
+        "phonetic": "/ˈtrænspɔːrt/",
+        "meaning": "ขนส่ง, ทำให้ปลื้ม"
+      },
+      {
+        "word": "transform",
+        "phonetic": "/trænsˈfɔːrm/",
+        "meaning": "เปลี่ยนแปลง"
+      }
+    ]
+  }
+];
+
+        let allExamples = [];
+        let prefixOnlyList = [];
+        let filteredSet = [];
+        let currentIdx = 0;
+        let cardState = 'front'; 
+
+        function flattenData() {
+            allExamples = [];
+            prefixOnlyList = [];
+
+            rawData.forEach(p => {
+                prefixOnlyList.push({
+                    type: 'prefix',
+                    prefix: p.prefix,
+                    meaning: p.meaning,
+                    translation: p.translation,
+                    examples_hint: p.examples.map(e => `${e.word} (${e.meaning})`).join(", ")
+                });
+
+                p.examples.forEach(ex => {
+                    allExamples.push({
+                        type: 'vocab',
+                        prefix: p.prefix,
+                        prefixMean: p.translation,
+                        ...ex
+                    });
+                });
+            });
+
+            const filter = document.getElementById('prefix-filter');
+            rawData.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.prefix;
+                opt.textContent = `${p.prefix} (${p.translation})`;
+                filter.appendChild(opt);
+            });
+
+            updateTotalCounter();
+        }
+
+        function updateTotalCounter() {
+            const type = document.getElementById('practice-type').value;
+            const filter = document.getElementById('prefix-filter');
+            const filterGroup = document.getElementById('prefix-filter-group');
+            
+            let total = 0;
+            if (type === 'vocabulary') {
+                filterGroup.classList.remove('hidden');
+                const selectedPrefix = filter.value;
+                if (selectedPrefix === 'all') {
+                    total = allExamples.length;
+                } else {
+                    total = allExamples.filter(x => x.prefix === selectedPrefix).length;
+                }
+            } else {
+                filterGroup.classList.add('hidden');
+                total = prefixOnlyList.length;
+            }
+
+            document.getElementById('total-count').textContent = total;
+            document.getElementById('range-end').value = total;
+        }
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function initGame() {
+            const practiceType = document.getElementById('practice-type').value;
+            const prefix = document.getElementById('prefix-filter').value;
+            const mode = document.getElementById('play-mode').value;
+            const start = parseInt(document.getElementById('range-start').value) - 1;
+            const end = parseInt(document.getElementById('range-end').value);
+
+            if (practiceType === 'vocabulary') {
+                if (prefix === 'all') {
+                    filteredSet = [...allExamples];
+                } else {
+                    filteredSet = allExamples.filter(x => x.prefix === prefix);
+                }
+            } else {
+                filteredSet = [...prefixOnlyList];
+            }
+
+            filteredSet = filteredSet.slice(Math.max(0, start), Math.min(filteredSet.length, end));
+
+            if (filteredSet.length === 0) {
+                alert("ไม่พบรายการที่ต้องการค้นหาในช่วงนี้");
+                return;
+            }
+
+            if (mode === 'random') {
+                filteredSet = shuffle(filteredSet);
+            }
+
+            currentIdx = 0;
+            showScreen('game-screen');
+            updateCard();
+        }
+
+        function updateCard() {
+            const data = filteredSet[currentIdx];
+            cardState = 'front';
+            
+            // Progress Update
+            const progNum = currentIdx + 1;
+            const progTotal = filteredSet.length;
+            document.getElementById('progress-text').textContent = `${progNum} / ${progTotal}`;
+            document.getElementById('progress-bar-fill').style.width = `${(progNum/progTotal)*100}%`;
+
+            const card = document.getElementById('card');
+            const badge = document.getElementById('card-badge');
+            
+            card.classList.remove('flipped', 'mode-prefix');
+            badge.classList.remove('invisible'); // ให้ Badge กลับมาแสดงทุกครั้งที่เปลี่ยนคำใหม่
+            
+            document.getElementById('reveal-content').classList.add('hidden');
+            document.getElementById('display-main').classList.remove('invisible');
+            document.getElementById('display-sub').classList.remove('invisible', 'hidden');
+            document.getElementById('hint-text').textContent = "แตะเพื่อดูเฉลย";
+
+            if (data.type === 'vocab') {
+                badge.textContent = `${data.prefix} (${data.prefixMean})`;
+                document.getElementById('display-main').textContent = data.word;
+                document.getElementById('display-sub').textContent = data.phonetic || '';
+                
+                document.getElementById('display-meaning').textContent = data.meaning;
+                document.getElementById('ex-label-text').textContent = "Example Sentence";
+                document.getElementById('display-ex-en').textContent = data.sentence || '-';
+                document.getElementById('display-ex-th').textContent = data.translation || '';
+            } else {
+                card.classList.add('mode-prefix');
+                badge.textContent = "PREFIX / ROOT";
+                document.getElementById('display-main').textContent = data.prefix;
+                document.getElementById('display-sub').classList.add('hidden');
+                
+                document.getElementById('display-meaning').textContent = `${data.meaning} (${data.translation})`;
+                document.getElementById('ex-label-text').textContent = "Example Words";
+                document.getElementById('display-ex-en').textContent = "คำศัพท์ที่เกี่ยวข้อง:";
+                document.getElementById('display-ex-th').textContent = data.examples_hint;
+            }
+
+            card.style.animation = 'none';
+            void card.offsetWidth;
+            card.style.animation = 'fadeIn 0.4s ease-out';
+        }
+
+        function handleCardClick() {
+            const data = filteredSet[currentIdx];
+            if (cardState === 'front') {
+                cardState = 'back';
+                document.getElementById('card').classList.add('flipped');
+                document.getElementById('reveal-content').classList.remove('hidden');
+                document.getElementById('hint-text').textContent = "แตะอีกครั้งเพื่อไปคำถัดไป";
+                
+                // ซ่อน Badge เมื่อกดเฉลย
+                document.getElementById('card-badge').classList.add('invisible');
+                
+                if (data.type === 'vocab') {
+                    document.getElementById('display-main').classList.add('invisible');
+                    document.getElementById('display-sub').classList.add('invisible');
+                }
+            } else {
+                currentIdx++;
+                if (currentIdx >= filteredSet.length) {
+                    alert("เก่งมาก! ฝึกซ้อมจนครบชุดแล้ว");
+                    exitGame();
+                } else {
+                    updateCard();
+                }
+            }
+        }
+
+        function showScreen(id) {
+            document.getElementById('setup-screen').style.display = (id === 'setup-screen' ? 'block' : 'none');
+            document.getElementById('game-screen').style.display = (id === 'game-screen' ? 'block' : 'none');
+        }
+
+        function exitGame() {
+            showScreen('setup-screen');
+        }
+
+        document.getElementById('prefix-filter').addEventListener('change', updateTotalCounter);
+        window.onload = flattenData;
+    </script>
+</body>
+</html>
